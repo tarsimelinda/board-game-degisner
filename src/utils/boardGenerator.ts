@@ -107,20 +107,20 @@ function generateCircleFields(
     ) {
         const angle =
             (i / fieldCount) *
-                Math.PI *
-                2 -
+            Math.PI *
+            2 -
             Math.PI / 2;
 
         positions.push({
             x:
                 centerX +
                 Math.cos(angle) *
-                    radius,
+                radius,
 
             y:
                 centerY +
                 Math.sin(angle) *
-                    radius,
+                radius,
         });
     }
 
@@ -176,7 +176,7 @@ function generateRectangleFields(
         else if (
             distance <=
             pathWidth +
-                pathHeight
+            pathHeight
         ) {
             distance -=
                 pathWidth;
@@ -194,7 +194,7 @@ function generateRectangleFields(
         else if (
             distance <=
             pathWidth * 2 +
-                pathHeight
+            pathHeight
         ) {
             distance -=
                 pathWidth +
@@ -223,6 +223,123 @@ function generateRectangleFields(
                 inset -
                 distance;
         }
+
+        positions.push({
+            x,
+            y,
+        });
+    }
+
+    return positions;
+}
+
+export function calculateSnakeFieldSize({
+    boardWidthMm,
+    boardHeightMm,
+    fieldCount,
+}: GenerateFieldsOptions): number {
+    if (fieldCount <= 0) {
+        return 0;
+    }
+
+    const aspectRatio =
+        boardWidthMm / boardHeightMm;
+
+    const columns =
+        Math.max(
+            1,
+            Math.ceil(
+                Math.sqrt(
+                    fieldCount *
+                    aspectRatio
+                )
+            )
+        );
+
+    const rows =
+        Math.ceil(
+            fieldCount / columns
+        );
+
+    const cellWidth =
+        boardWidthMm / columns;
+
+    const cellHeight =
+        boardHeightMm / rows;
+
+    return Math.min(
+        18,
+        cellWidth * 0.65,
+        cellHeight * 0.65
+    );
+}
+
+export function generateSnakeFields({
+    boardWidthMm,
+    boardHeightMm,
+    fieldCount,
+}: GenerateFieldsOptions): FieldPosition[] {
+    if (fieldCount <= 0) {
+        return [];
+    }
+
+    const aspectRatio =
+        boardWidthMm / boardHeightMm;
+
+    const columns =
+        Math.max(
+            1,
+            Math.ceil(
+                Math.sqrt(
+                    fieldCount *
+                    aspectRatio
+                )
+            )
+        );
+
+    const rows =
+        Math.ceil(
+            fieldCount / columns
+        );
+
+    const cellWidth =
+        boardWidthMm / columns;
+
+    const cellHeight =
+        boardHeightMm / rows;
+
+    const positions: FieldPosition[] = [];
+
+    for (
+        let i = 0;
+        i < fieldCount;
+        i++
+    ) {
+        const row =
+            Math.floor(i / columns);
+
+        const positionInRow =
+            i % columns;
+
+        const isReverseRow =
+            row % 2 === 1;
+
+        const column =
+            isReverseRow
+                ? columns -
+                  1 -
+                  positionInRow
+                : positionInRow;
+
+        const x =
+            column *
+                cellWidth +
+            cellWidth / 2;
+
+        const y =
+            row *
+                cellHeight +
+            cellHeight / 2;
 
         positions.push({
             x,

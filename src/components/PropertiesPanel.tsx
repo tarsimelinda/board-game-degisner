@@ -1,5 +1,7 @@
 import React from "react";
 
+import { BoardLayout } from "../models/BoardLayout";
+
 import { BoardShape } from "../models/BoardArea";
 import {
     Orientation,
@@ -19,6 +21,9 @@ interface PropertiesPanelProps {
     fieldCount: number;
     setFieldCount: (count: number) => void;
     onGenerate: () => void;
+
+    layout: BoardLayout;
+    setLayout: (layout: BoardLayout) => void;
 }
 
 export function PropertiesPanel({
@@ -30,6 +35,8 @@ export function PropertiesPanel({
     setBoardShape,
     fieldCount,
     setFieldCount,
+    layout,
+    setLayout,
     onGenerate,
 }: PropertiesPanelProps) {
     return (
@@ -71,11 +78,19 @@ export function PropertiesPanel({
 
                 <select
                     value={boardShape}
-                    onChange={(event) =>
-                        setBoardShape(
-                            event.target.value as BoardShape
-                        )
-                    }
+                    onChange={(event) => {
+                        const newShape =
+                            event.target.value as BoardShape;
+
+                        setBoardShape(newShape);
+
+                        if (
+                            newShape === "circle" &&
+                            layout === "snake"
+                        ) {
+                            setLayout("perimeter");
+                        }
+                    }}
                 >
                     <option value="safe-page">
                         Safe page
@@ -95,6 +110,30 @@ export function PropertiesPanel({
 
                     <option value="custom">
                         Custom
+                    </option>
+                </select>
+            </label>
+
+            <label>
+                Layout
+
+                <select
+                    value={layout}
+                    onChange={(event) =>
+                        setLayout(
+                            event.target.value as BoardLayout
+                        )
+                    }
+                >
+                    <option value="perimeter">
+                        Perimeter
+                    </option>
+
+                    <option
+                        value="snake"
+                        disabled={boardShape === "circle"}
+                    >
+                        Snake
                     </option>
                 </select>
             </label>

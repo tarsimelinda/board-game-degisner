@@ -8,6 +8,8 @@ import { PropertiesPanel } from "./components/PropertiesPanel";
 import { BoardShape } from "./models/BoardArea";
 import { PaperSize, Orientation } from "./models/BoardProject";
 
+import { BoardLayout } from "./models/BoardLayout";
+
 import "./styles/app.css";
 
 function App() {
@@ -21,6 +23,9 @@ function App() {
   const [fieldCountInput, setFieldCountInput] = useState(50);
   const [generatedFieldCount, setGeneratedFieldCount] = useState(0);
 
+  const [layout, setLayout] =
+    useState<BoardLayout>("perimeter");
+
   return (
     <div className="app">
       <Toolbar />
@@ -31,18 +36,28 @@ function App() {
           orientation={orientation}
           boardShape={boardShape}
           fieldCount={generatedFieldCount}
+          layout={layout}
         />
 
         <PropertiesPanel
           paperSize={paperSize}
           setPaperSize={setPaperSize}
+
           orientation={orientation}
           setOrientation={setOrientation}
+
           boardShape={boardShape}
           setBoardShape={setBoardShape}
+
           fieldCount={fieldCountInput}
           setFieldCount={setFieldCountInput}
-          onGenerate={() => setGeneratedFieldCount(fieldCountInput)}
+
+          layout={layout}
+          setLayout={setLayout}
+
+          onGenerate={() =>
+            setGeneratedFieldCount(fieldCountInput)
+          }
         />
       </div>
     </div>

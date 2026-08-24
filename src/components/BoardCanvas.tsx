@@ -8,14 +8,19 @@ import {
 
 import {
     calculateFieldSize,
+    calculateSnakeFieldSize,
     generatePerimeterFields,
+    generateSnakeFields,
 } from "../utils/boardGenerator";
+
+import { BoardLayout } from "../models/BoardLayout";
 
 interface BoardCanvasProps {
     paperSize: PaperSize;
     orientation: Orientation;
     boardShape: BoardShape;
     fieldCount: number;
+    layout: BoardLayout;
 }
 
 interface FieldPosition {
@@ -42,6 +47,7 @@ export function BoardCanvas({
     orientation,
     boardShape,
     fieldCount,
+    layout,
 }: BoardCanvasProps) {
     const canvasRef = useRef<HTMLElement>(null);
 
@@ -174,20 +180,34 @@ export function BoardCanvas({
         boardHeightMm * displayScale;
 
     const fieldSizeMm =
-        calculateFieldSize({
-            boardWidthMm,
-            boardHeightMm,
-            boardShape,
-            fieldCount,
-        });
+        layout === "snake"
+            ? calculateSnakeFieldSize({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            })
+            : calculateFieldSize({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
 
     const fieldPositions =
-        generatePerimeterFields({
-            boardWidthMm,
-            boardHeightMm,
-            boardShape,
-            fieldCount,
-        });
+        layout === "snake"
+            ? generateSnakeFields({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            })
+            : generatePerimeterFields({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
 
     return (
         <main
