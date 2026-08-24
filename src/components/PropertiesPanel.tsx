@@ -15,6 +15,10 @@ interface PropertiesPanelProps {
 
     boardShape: BoardShape;
     setBoardShape: (shape: BoardShape) => void;
+
+    fieldCount: number;
+    setFieldCount: (count: number) => void;
+    onGenerate: () => void;
 }
 
 export function PropertiesPanel({
@@ -24,6 +28,9 @@ export function PropertiesPanel({
     setOrientation,
     boardShape,
     setBoardShape,
+    fieldCount,
+    setFieldCount,
+    onGenerate,
 }: PropertiesPanelProps) {
     return (
         <aside className="properties-panel">
@@ -91,6 +98,26 @@ export function PropertiesPanel({
                     </option>
                 </select>
             </label>
+
+            <label>
+                Number of fields
+
+                <input
+                    type="number"
+                    min="2"
+                    max="500"
+                    value={fieldCount}
+                    onChange={(event) =>
+                        setFieldCount(
+                            Math.max(2, Number(event.target.value))
+                        )
+                    }
+                />
+            </label>
+
+            <button onClick={onGenerate}>
+                Generate fields
+            </button>
         </aside>
     );
 }

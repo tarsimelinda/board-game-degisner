@@ -15,8 +15,11 @@ function App() {
   const [orientation, setOrientation] =
     useState<Orientation>("portrait");
 
-const [boardShape, setBoardShape] =
-  useState<BoardShape>("safe-page");
+  const [boardShape, setBoardShape] =
+    useState<BoardShape>("safe-page");
+
+  const [fieldCountInput, setFieldCountInput] = useState(50);
+  const [generatedFieldCount, setGeneratedFieldCount] = useState(0);
 
   return (
     <div className="app">
@@ -27,6 +30,7 @@ const [boardShape, setBoardShape] =
           paperSize={paperSize}
           orientation={orientation}
           boardShape={boardShape}
+          fieldCount={generatedFieldCount}
         />
 
         <PropertiesPanel
@@ -36,6 +40,9 @@ const [boardShape, setBoardShape] =
           setOrientation={setOrientation}
           boardShape={boardShape}
           setBoardShape={setBoardShape}
+          fieldCount={fieldCountInput}
+          setFieldCount={setFieldCountInput}
+          onGenerate={() => setGeneratedFieldCount(fieldCountInput)}
         />
       </div>
     </div>

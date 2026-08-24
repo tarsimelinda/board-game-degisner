@@ -100,13 +100,15 @@ select {
 }
 
 .board {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
+
+    flex-shrink: 0;
 
     border: 2px dashed #777;
 
     background: #f8f8f8;
+
+    overflow: hidden;
 }
 
 .board-circle {
@@ -121,4 +123,24 @@ select {
 
     justify-content: center;
     align-items: center;
+}
+
+.board-field {
+    position: absolute;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transform: translate(-50%, -50%);
+
+    border: 1px solid #333;
+
+    border-radius: 50%;
+
+    background: white;
+
+    font-size: 11px;
+
+    user-select: none;
 }
