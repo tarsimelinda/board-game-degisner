@@ -4,12 +4,6 @@ import {
     GridPreset,
     GRID_PRESET_SIZE,
 } from "../models/GridPreset";
-
-
-// =====================================================
-// COMMON TYPES
-// =====================================================
-
 export interface FieldPosition {
     x: number;
     y: number;
@@ -21,11 +15,6 @@ interface GenerateFieldsOptions {
     boardShape: BoardShape;
     fieldCount: number;
 }
-
-
-// =====================================================
-// PERIMETER FIELD SIZE
-// =====================================================
 
 export function calculateFieldSize({
     boardWidthMm,
@@ -59,11 +48,6 @@ export function calculateFieldSize({
         ) * 0.7
     );
 }
-
-
-// =====================================================
-// PERIMETER GENERATION
-// =====================================================
 
 export function generatePerimeterFields({
     boardWidthMm,
@@ -103,11 +87,6 @@ export function generatePerimeterFields({
         fieldSizeMm
     );
 }
-
-
-// =====================================================
-// CIRCLE PERIMETER
-// =====================================================
 
 function generateCircleFields(
     boardWidthMm: number,
@@ -162,11 +141,6 @@ function generateCircleFields(
     return positions;
 }
 
-
-// =====================================================
-// RECTANGLE PERIMETER
-// =====================================================
-
 function generateRectangleFields(
     boardWidthMm: number,
     boardHeightMm: number,
@@ -207,7 +181,6 @@ function generateRectangleFields(
         let x: number;
         let y: number;
 
-        // TOP
         if (
             distance <=
             pathWidth
@@ -219,7 +192,6 @@ function generateRectangleFields(
             y = inset;
         }
 
-        // RIGHT
         else if (
             distance <=
             pathWidth +
@@ -237,7 +209,6 @@ function generateRectangleFields(
                 distance;
         }
 
-        // BOTTOM
         else if (
             distance <=
             pathWidth * 2 +
@@ -257,7 +228,6 @@ function generateRectangleFields(
                 inset;
         }
 
-        // LEFT
         else {
             distance -=
                 pathWidth * 2 +
@@ -279,11 +249,6 @@ function generateRectangleFields(
 
     return positions;
 }
-
-
-// =====================================================
-// SNAKE FIELD SIZE
-// =====================================================
 
 export function calculateSnakeFieldSize({
     boardWidthMm,
@@ -329,11 +294,6 @@ export function calculateSnakeFieldSize({
         cellHeight * 0.65
     );
 }
-
-
-// =====================================================
-// SNAKE GENERATION
-// =====================================================
 
 export function generateSnakeFields({
     boardWidthMm,
@@ -420,11 +380,6 @@ export function generateSnakeFields({
     return positions;
 }
 
-
-// =====================================================
-// SQUARE GRID
-// =====================================================
-
 interface GenerateSquareGridOptions {
     boardWidthMm: number;
     boardHeightMm: number;
@@ -446,13 +401,6 @@ export function generateSquareGrid({
     const baseGridSize =
         GRID_PRESET_SIZE[preset];
 
-    /*
-     * A rövidebb oldalon:
-     *
-     * Large  = 5 mező
-     * Medium = 8 mező
-     * Small  = 13 mező
-     */
     const shorterSide =
         Math.min(
             boardWidthMm,
@@ -466,15 +414,6 @@ export function generateSquareGrid({
     let columns: number;
     let rows: number;
 
-    /*
-     * Álló Rectangle vagy Square:
-     *
-     * pl. 195 × 282
-     *
-     * Medium:
-     * 8 oszlop
-     * 11 sor
-     */
     if (
         boardWidthMm <=
         boardHeightMm
@@ -489,15 +428,6 @@ export function generateSquareGrid({
             );
     }
 
-    /*
-     * Fekvő Rectangle:
-     *
-     * pl. 282 × 195
-     *
-     * Medium:
-     * 11 oszlop
-     * 8 sor
-     */
     else {
         rows =
             baseGridSize;
@@ -517,10 +447,6 @@ export function generateSquareGrid({
         rows *
         fieldSizeMm;
 
-    /*
-     * A maradék hely mindig
-     * szimmetrikusan oszlik el.
-     */
     const offsetX =
         (
             boardWidthMm -
@@ -567,5 +493,124 @@ export function generateSquareGrid({
         fieldSizeMm,
         rows,
         columns,
+    };
+}
+
+interface GenerateCircleGridOptions {
+    boardWidthMm: number;
+    boardHeightMm: number;
+    preset: GridPreset;
+}
+
+export function generateCircleGrid({
+    boardWidthMm,
+    boardHeightMm,
+    preset,
+}: GenerateCircleGridOptions): SquareGridResult {
+    const baseGridSize =
+        GRID_PRESET_SIZE[preset];
+
+    const diameter =
+        Math.min(
+            boardWidthMm,
+            boardHeightMm
+        );
+
+    const radius =
+        diameter / 2;
+
+    const fieldSizeMm =
+        diameter / baseGridSize;
+
+    const centerX =
+        boardWidthMm / 2;
+
+    const centerY =
+        boardHeightMm / 2;
+
+    const positions: FieldPosition[] = [];
+
+    for (
+        let row = 0;
+        row < baseGridSize;
+        row++
+    ) {
+        for (
+            let column = 0;
+            column < baseGridSize;
+            column++
+        ) {
+            const x =
+                column * fieldSizeMm +
+                fieldSizeMm / 2;
+
+            const y =
+                row * fieldSizeMm +
+                fieldSizeMm / 2;
+
+            const half =
+                fieldSizeMm / 2;
+
+            /*
+             * A négyzet négy sarka.
+             */
+            const corners = [
+                {
+                    x: x - half,
+                    y: y - half,
+                },
+                {
+                    x: x + half,
+                    y: y - half,
+                },
+                {
+                    x: x - half,
+                    y: y + half,
+                },
+                {
+                    x: x + half,
+                    y: y + half,
+                },
+            ];
+
+            /*
+             * Csak akkor tartjuk meg a mezőt,
+             * ha MIND A NÉGY sarka
+             * a körön belül van.
+             */
+            const fitsInsideCircle =
+                corners.every((corner) => {
+                    const dx =
+                        corner.x -
+                        centerX;
+
+                    const dy =
+                        corner.y -
+                        centerY;
+
+                    const distanceSquared =
+                        dx * dx +
+                        dy * dy;
+
+                    return (
+                        distanceSquared <=
+                        radius * radius
+                    );
+                });
+
+            if (fitsInsideCircle) {
+                positions.push({
+                    x,
+                    y,
+                });
+            }
+        }
+    }
+
+    return {
+        positions,
+        fieldSizeMm,
+        rows: baseGridSize,
+        columns: baseGridSize,
     };
 }

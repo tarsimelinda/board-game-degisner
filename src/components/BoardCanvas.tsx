@@ -14,6 +14,7 @@ import {
     generatePerimeterFields,
     generateSnakeFields,
     generateSquareGrid,
+    generateCircleGrid,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -209,24 +210,28 @@ export function BoardCanvas({
         displayScale;
 
     // -------------------------
-    // SQUARE GRID
+    // GRID
     // -------------------------
 
-    const usesSquareGrid =
-        layout === "square-grid" &&
-        (
-            boardShape === "square" ||
-            boardShape === "rectangle"
-        );
+    const usesGrid =
+        layout === "square-grid";
 
-    const squareGrid =
-        usesSquareGrid
-            ? generateSquareGrid({
-                boardWidthMm,
-                boardHeightMm,
-                preset: gridPreset,
-            })
-            : null;
+    const grid =
+        !usesGrid
+            ? null
+
+            : boardShape === "circle"
+                ? generateCircleGrid({
+                    boardWidthMm,
+                    boardHeightMm,
+                    preset: gridPreset,
+                })
+
+                : generateSquareGrid({
+                    boardWidthMm,
+                    boardHeightMm,
+                    preset: gridPreset,
+                });
 
     // -------------------------
     // FIELD SIZE
@@ -234,9 +239,9 @@ export function BoardCanvas({
 
     let fieldSizeMm: number;
 
-    if (squareGrid) {
+    if (grid) {
         fieldSizeMm =
-            squareGrid.fieldSizeMm;
+            grid.fieldSizeMm;
     }
     else if (
         layout === "snake"
@@ -265,9 +270,9 @@ export function BoardCanvas({
 
     let fieldPositions;
 
-    if (squareGrid) {
+    if (grid) {
         fieldPositions =
-            squareGrid.positions;
+            grid.positions;
     }
     else if (
         layout === "snake"
@@ -329,7 +334,7 @@ export function BoardCanvas({
                                     key={index}
                                     className={
                                         `board-field ${
-                                            usesSquareGrid
+                                            usesGrid
                                                 ? "board-field-square"
                                                 : ""
                                         }`
