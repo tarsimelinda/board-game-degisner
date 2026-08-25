@@ -4,9 +4,17 @@ import {
     GridPreset,
     GRID_PRESET_SIZE,
 } from "../models/GridPreset";
+
 export interface FieldPosition {
     x: number;
     y: number;
+}
+export interface FieldGeometry {
+    x: number;
+    y: number;
+
+    width: number;
+    height: number;
 }
 
 interface GenerateFieldsOptions {
@@ -551,9 +559,6 @@ export function generateCircleGrid({
             const half =
                 fieldSizeMm / 2;
 
-            /*
-             * A négyzet négy sarka.
-             */
             const corners = [
                 {
                     x: x - half,
@@ -573,11 +578,6 @@ export function generateCircleGrid({
                 },
             ];
 
-            /*
-             * Csak akkor tartjuk meg a mezőt,
-             * ha MIND A NÉGY sarka
-             * a körön belül van.
-             */
             const fitsInsideCircle =
                 corners.every((corner) => {
                     const dx =
@@ -613,4 +613,251 @@ export function generateCircleGrid({
         rows: baseGridSize,
         columns: baseGridSize,
     };
+}
+
+interface GenerateMonopolyRingOptions {
+    boardWidthMm: number;
+    boardHeightMm: number;
+    sideFieldsPerSide: number;
+    fieldDepthMm: number;
+}
+
+export function generateMonopolyRing({
+    boardWidthMm,
+    boardHeightMm,
+    sideFieldsPerSide,
+    fieldDepthMm,
+}: GenerateMonopolyRingOptions): FieldGeometry[] {
+    if (
+        sideFieldsPerSide <= 0 ||
+        sideFieldsPerSide % 2 === 0
+    ) {
+        return [];
+    }
+
+    const boardSizeMm =
+        Math.min(
+            boardWidthMm,
+            boardHeightMm
+        );
+
+    /*
+     * Matematikailag a depth csak addig nőhet,
+     * amíg marad hely az oldalsó mezőknek.
+     */
+    const maxDepth =
+        boardSizeMm / 2 - 0.01;
+
+    const depth =
+        Math.min(
+            fieldDepthMm,
+            maxDepth
+        );
+
+    /*
+     * Két sarokmező elvesz depth + depth
+     * helyet az oldalból.
+     *
+     * A maradékon osztoznak az oldalsó mezők.
+     */
+    const sideFieldWidth =
+        (
+            boardSizeMm -
+            2 * depth
+        ) /
+        sideFieldsPerSide;
+
+    const fields: FieldGeometry[] = [];
+
+    // ==========================================
+    // 1. BOTTOM-RIGHT CORNER
+    // ==========================================
+
+    fields.push({
+        x:
+            boardSizeMm -
+            depth / 2,
+
+        y:
+            boardSizeMm -
+            depth / 2,
+
+        width: depth,
+        height: depth,
+    });
+
+    // ==========================================
+    // 2. BOTTOM SIDE
+    // right -> left
+    // ==========================================
+
+    for (
+        let i = 0;
+        i < sideFieldsPerSide;
+        i++
+    ) {
+        fields.push({
+            x:
+                boardSizeMm -
+                depth -
+                (
+                    i + 0.5
+                ) *
+                sideFieldWidth,
+
+            y:
+                boardSizeMm -
+                depth / 2,
+
+            width:
+                sideFieldWidth,
+
+            height:
+                depth,
+        });
+    }
+
+    // ==========================================
+    // 3. BOTTOM-LEFT CORNER
+    // ==========================================
+
+    fields.push({
+        x:
+            depth / 2,
+
+        y:
+            boardSizeMm -
+            depth / 2,
+
+        width: depth,
+        height: depth,
+    });
+
+    // ==========================================
+    // 4. LEFT SIDE
+    // bottom -> top
+    // ==========================================
+
+    for (
+        let i = 0;
+        i < sideFieldsPerSide;
+        i++
+    ) {
+        fields.push({
+            x:
+                depth / 2,
+
+            y:
+                boardSizeMm -
+                depth -
+                (
+                    i + 0.5
+                ) *
+                sideFieldWidth,
+
+            width:
+                depth,
+
+            height:
+                sideFieldWidth,
+        });
+    }
+
+    // ==========================================
+    // 5. TOP-LEFT CORNER
+    // ==========================================
+
+    fields.push({
+        x:
+            depth / 2,
+
+        y:
+            depth / 2,
+
+        width:
+            depth,
+
+        height:
+            depth,
+    });
+
+    // ==========================================
+    // 6. TOP SIDE
+    // left -> right
+    // ==========================================
+
+    for (
+        let i = 0;
+        i < sideFieldsPerSide;
+        i++
+    ) {
+        fields.push({
+            x:
+                depth +
+                (
+                    i + 0.5
+                ) *
+                sideFieldWidth,
+
+            y:
+                depth / 2,
+
+            width:
+                sideFieldWidth,
+
+            height:
+                depth,
+        });
+    }
+
+    // ==========================================
+    // 7. TOP-RIGHT CORNER
+    // ==========================================
+
+    fields.push({
+        x:
+            boardSizeMm -
+            depth / 2,
+
+        y:
+            depth / 2,
+
+        width:
+            depth,
+
+        height:
+            depth,
+    });
+
+    // ==========================================
+    // 8. RIGHT SIDE
+    // top -> bottom
+    // ==========================================
+
+    for (
+        let i = 0;
+        i < sideFieldsPerSide;
+        i++
+    ) {
+        fields.push({
+            x:
+                boardSizeMm -
+                depth / 2,
+
+            y:
+                depth +
+                (
+                    i + 0.5
+                ) *
+                sideFieldWidth,
+
+            width:
+                depth,
+
+            height:
+                sideFieldWidth,
+        });
+    }
+
+    return fields;
 }

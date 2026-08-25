@@ -15,6 +15,7 @@ import {
     generateSnakeFields,
     generateSquareGrid,
     generateCircleGrid,
+    generateMonopolyRing,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -24,6 +25,9 @@ interface BoardCanvasProps {
     fieldCount: number;
     layout: BoardLayout;
     gridPreset: GridPreset;
+
+    monopolySideFields: number;
+    monopolyDepthPercent: number;
 }
 
 const PAPER_SIZES = {
@@ -49,18 +53,17 @@ export function BoardCanvas({
     fieldCount,
     layout,
     gridPreset,
+    monopolySideFields,
+    monopolyDepthPercent,
 }: BoardCanvasProps) {
-    const canvasRef = useRef<HTMLElement>(null);
+    const canvasRef =
+        useRef<HTMLElement>(null);
 
     const [fitScale, setFitScale] =
         useState(1);
 
     const paper =
         PAPER_SIZES[paperSize];
-
-    // -------------------------
-    // PAPER SIZE
-    // -------------------------
 
     let paperWidthMm =
         paper.width;
@@ -96,9 +99,9 @@ export function BoardCanvas({
         ];
     }
 
-    // -------------------------
+    // =========================
     // FIT TO WINDOW
-    // -------------------------
+    // =========================
 
     useEffect(() => {
         const canvas =
@@ -154,9 +157,9 @@ export function BoardCanvas({
         paperHeightMm,
     ]);
 
-    // -------------------------
+    // =========================
     // DISPLAY SCALE
-    // -------------------------
+    // =========================
 
     const zoom = 1;
 
@@ -171,9 +174,9 @@ export function BoardCanvas({
         paperHeightMm *
         displayScale;
 
-    // -------------------------
+    // =========================
     // BOARD SIZE
-    // -------------------------
+    // =========================
 
     let boardWidthMm: number;
     let boardHeightMm: number;
@@ -209,9 +212,9 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
-    // -------------------------
+    // =========================
     // GRID
-    // -------------------------
+    // =========================
 
     const usesGrid =
         layout === "square-grid";
@@ -219,85 +222,111 @@ export function BoardCanvas({
     const grid =
         !usesGrid
             ? null
-
             : boardShape === "circle"
                 ? generateCircleGrid({
                     boardWidthMm,
                     boardHeightMm,
                     preset: gridPreset,
                 })
-
                 : generateSquareGrid({
                     boardWidthMm,
                     boardHeightMm,
                     preset: gridPreset,
                 });
 
-    // -------------------------
-    // FIELD SIZE
-    // -------------------------
+    // =========================
+    // MONOPOLY RING
+    // =========================
 
-    let fieldSizeMm: number;
+    const usesMonopolyRing =
+        layout === "monopoly-ring" &&
+        boardShape === "square";
 
-    if (grid) {
-        fieldSizeMm =
-            grid.fieldSizeMm;
-    }
-    else if (
-        layout === "snake"
-    ) {
-        fieldSizeMm =
-            calculateSnakeFieldSize({
+    /*
+     * Példa:
+     * A4 square = 195 mm
+     * 16% depth = 31.2 mm
+     */
+    const monopolyDepthMm =
+        boardWidthMm *
+        (
+            monopolyDepthPercent /
+            100
+        );
+
+    const monopolyFields =
+        usesMonopolyRing
+            ? generateMonopolyRing({
                 boardWidthMm,
                 boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
-    }
-    else {
-        fieldSizeMm =
-            calculateFieldSize({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
+
+                sideFieldsPerSide:
+                    monopolySideFields,
+
+                fieldDepthMm:
+                    monopolyDepthMm,
+            })
+            : [];
+
+    // =========================
+    // NORMAL FIELD SIZE
+    // =========================
+
+    let fieldSizeMm = 0;
+
+    if (!usesMonopolyRing) {
+        if (grid) {
+            fieldSizeMm =
+                grid.fieldSizeMm;
+        }
+        else if (
+            layout === "snake"
+        ) {
+            fieldSizeMm =
+                calculateSnakeFieldSize({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                });
+        }
+        else {
+            fieldSizeMm =
+                calculateFieldSize({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                });
+        }
     }
 
-    // -------------------------
-    // FIELD POSITIONS
-    // -------------------------
+    // =========================
+    // NORMAL FIELD POSITIONS
+    // =========================
 
-    let fieldPositions;
+    const fieldPositions =
+        usesMonopolyRing
+            ? []
+            : grid
+                ? grid.positions
+                : layout === "snake"
+                    ? generateSnakeFields({
+                        boardWidthMm,
+                        boardHeightMm,
+                        boardShape,
+                        fieldCount,
+                    })
+                    : generatePerimeterFields({
+                        boardWidthMm,
+                        boardHeightMm,
+                        boardShape,
+                        fieldCount,
+                    });
 
-    if (grid) {
-        fieldPositions =
-            grid.positions;
-    }
-    else if (
-        layout === "snake"
-    ) {
-        fieldPositions =
-            generateSnakeFields({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
-    }
-    else {
-        fieldPositions =
-            generatePerimeterFields({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
-    }
-
-    // -------------------------
+    // =========================
     // RENDER
-    // -------------------------
+    // =========================
 
     return (
         <main
@@ -325,42 +354,79 @@ export function BoardCanvas({
                                 boardDisplayHeight,
                         }}
                     >
-                        {fieldPositions.map(
-                            (
-                                field,
-                                index
-                            ) => (
-                                <div
-                                    key={index}
-                                    className={
-                                        `board-field ${
-                                            usesGrid
-                                                ? "board-field-square"
-                                                : ""
-                                        }`
-                                    }
-                                    style={{
-                                        width:
-                                            fieldSizeMm *
-                                            displayScale,
+                        {/* MONOPOLY RING */}
 
-                                        height:
-                                            fieldSizeMm *
-                                            displayScale,
+                        {usesMonopolyRing &&
+                            monopolyFields.map(
+                                (
+                                    field,
+                                    index
+                                ) => (
+                                    <div
+                                        key={`monopoly-${index}`}
+                                        className="board-field board-field-monopoly"
+                                        style={{
+                                            width:
+                                                field.width *
+                                                displayScale,
 
-                                        left:
-                                            field.x *
-                                            displayScale,
+                                            height:
+                                                field.height *
+                                                displayScale,
 
-                                        top:
-                                            field.y *
-                                            displayScale,
-                                    }}
-                                >
-                                    {index + 1}
-                                </div>
-                            )
-                        )}
+                                            left:
+                                                field.x *
+                                                displayScale,
+
+                                            top:
+                                                field.y *
+                                                displayScale,
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </div>
+                                )
+                            )}
+
+                        {/* OTHER LAYOUTS */}
+
+                        {!usesMonopolyRing &&
+                            fieldPositions.map(
+                                (
+                                    field,
+                                    index
+                                ) => (
+                                    <div
+                                        key={index}
+                                        className={
+                                            `board-field ${
+                                                usesGrid
+                                                    ? "board-field-square"
+                                                    : ""
+                                            }`
+                                        }
+                                        style={{
+                                            width:
+                                                fieldSizeMm *
+                                                displayScale,
+
+                                            height:
+                                                fieldSizeMm *
+                                                displayScale,
+
+                                            left:
+                                                field.x *
+                                                displayScale,
+
+                                            top:
+                                                field.y *
+                                                displayScale,
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </div>
+                                )
+                            )}
                     </div>
                 </div>
             </div>

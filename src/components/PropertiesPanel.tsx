@@ -29,6 +29,16 @@ interface PropertiesPanelProps {
 
     gridPreset: GridPreset;
     setGridPreset: (preset: GridPreset) => void;
+
+    monopolySideFields: number;
+
+    setMonopolySideFields:
+    (count: number) => void;
+
+    monopolyDepthPercent: number;
+
+    setMonopolyDepthPercent:
+    (depth: number) => void;
 }
 
 export function PropertiesPanel({
@@ -45,6 +55,11 @@ export function PropertiesPanel({
     gridPreset,
     setGridPreset,
     onGenerate,
+    monopolySideFields,
+    setMonopolySideFields,
+
+    monopolyDepthPercent,
+    setMonopolyDepthPercent,
 }: PropertiesPanelProps) {
     return (
         <aside className="properties-panel">
@@ -108,6 +123,13 @@ export function PropertiesPanel({
                         if (newShape === "square") {
                             setLayout("square-grid");
                         }
+
+                        if (
+                            newShape !== "square" &&
+                            layout === "monopoly-ring"
+                        ) {
+                            setLayout("perimeter");
+                        }
                     }}
                 >
                     <option value="rectangle">
@@ -149,35 +171,123 @@ export function PropertiesPanel({
                     <option value="square-grid">
                         Square Grid
                     </option>
+
+                    <option
+                        value="monopoly-ring"
+                        disabled={boardShape !== "square"}
+                    >
+                        Monopoly Ring
+                    </option>
                 </select>
             </label>
 
-            {layout === "square-grid" && (
-                <label>
-                    Grid size
+            {layout === "monopoly-ring" && (
+                <>
+                    <label>
+                        Fields per side
 
-                    <select
-                        value={gridPreset}
-                        onChange={(event) =>
-                            setGridPreset(
-                                event.target.value as GridPreset
-                            )
-                        }
-                    >
-                        <option value="large">
-                            Large — 5 × 5 (25 fields)
-                        </option>
+                        <select
+                            value={monopolySideFields}
+                            onChange={(event) =>
+                                setMonopolySideFields(
+                                    Number(
+                                        event.target.value
+                                    )
+                                )
+                            }
+                        >
+                            <option value={3}>
+                                3
+                            </option>
 
-                        <option value="medium">
-                            Medium — 8 × 8 (64 fields)
-                        </option>
+                            <option value={5}>
+                                5
+                            </option>
 
-                        <option value="small">
-                            Small — 13 × 13 (169 fields)
-                        </option>
-                    </select>
-                </label>
+                            <option value={7}>
+                                7
+                            </option>
+
+                            <option value={9}>
+                                9
+                            </option>
+
+                            <option value={11}>
+                                11
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Field depth
+
+                        <input
+                            type="range"
+                            min="8"
+                            max="40"
+                            step="1"
+                            value={monopolyDepthPercent}
+                            onChange={(event) =>
+                                setMonopolyDepthPercent(
+                                    Number(
+                                        event.target.value
+                                    )
+                                )
+                            }
+                        />
+
+                        <span>
+                            {monopolyDepthPercent}%
+                            {" — "}
+                            {(
+                                (
+                                    paperSize === "A4"
+                                        ? 195
+                                        : 282
+                                ) *
+                                monopolyDepthPercent /
+                                100
+                            ).toFixed(1)}
+                            {" mm"}
+                        </span>
+                    </label>
+
+                    <div>
+                        Total fields:{" "}
+                        {4 * monopolySideFields + 4}
+                    </div>
+                </>
             )}
+
+            {
+                layout !== "square-grid" &&
+                layout !== "monopoly-ring" &&
+                (
+                    <label>
+                        Grid size
+
+                        <select
+                            value={gridPreset}
+                            onChange={(event) =>
+                                setGridPreset(
+                                    event.target.value as GridPreset
+                                )
+                            }
+                        >
+                            <option value="large">
+                                Large — 5 × 5 (25 fields)
+                            </option>
+
+                            <option value="medium">
+                                Medium — 8 × 8 (64 fields)
+                            </option>
+
+                            <option value="small">
+                                Small — 13 × 13 (169 fields)
+                            </option>
+                        </select>
+                    </label>
+                )}
 
             {layout !== "square-grid" && (
                 <>

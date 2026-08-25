@@ -31,6 +31,16 @@ function App() {
   const [gridPreset, setGridPreset] =
     useState<GridPreset>("medium");
 
+  const [
+    monopolySideFields,
+    setMonopolySideFields,
+  ] = useState(7);
+
+  const [
+    monopolyDepthPercent,
+    setMonopolyDepthPercent,
+  ] = useState(16);
+
   return (
     <div className="app">
       <Toolbar />
@@ -43,6 +53,9 @@ function App() {
           fieldCount={generatedFieldCount}
           layout={layout}
           gridPreset={gridPreset}
+
+          monopolySideFields={monopolySideFields}
+          monopolyDepthPercent={monopolyDepthPercent}
         />
 
         <PropertiesPanel
@@ -63,6 +76,12 @@ function App() {
 
           gridPreset={gridPreset}
           setGridPreset={setGridPreset}
+
+          monopolySideFields={monopolySideFields}
+          setMonopolySideFields={setMonopolySideFields}
+
+          monopolyDepthPercent={monopolyDepthPercent}
+          setMonopolyDepthPercent={setMonopolyDepthPercent}
 
           onGenerate={() =>
             setGeneratedFieldCount(fieldCountInput)

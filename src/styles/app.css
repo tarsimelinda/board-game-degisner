@@ -148,3 +148,7 @@ select {
 .board-field-square {
     border-radius: 0;
 }
+
+.board-field-monopoly {
+    border-radius: 0;
+}

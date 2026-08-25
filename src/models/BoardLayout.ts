@@ -1,4 +1,5 @@
 export type BoardLayout =
     | "perimeter"
     | "snake"
-    | "square-grid";
+    | "square-grid"
+    | "monopoly-ring";
