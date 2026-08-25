@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { BoardShape } from "../models/BoardArea";
-
 import { GridPreset } from "../models/GridPreset";
-
 import {
     Orientation,
     PaperSize,
 } from "../models/BoardProject";
+import { BoardLayout } from "../models/BoardLayout";
 
 import {
     calculateFieldSize,
@@ -16,8 +15,6 @@ import {
     generateSnakeFields,
     generateSquareGrid,
 } from "../utils/boardGenerator";
-
-import { BoardLayout } from "../models/BoardLayout";
 
 interface BoardCanvasProps {
     paperSize: PaperSize;
@@ -32,7 +29,6 @@ const PAPER_SIZES = {
     A4: {
         width: 210,
         height: 297,
-
         printableWidth: 195,
         printableHeight: 282,
     },
@@ -40,7 +36,6 @@ const PAPER_SIZES = {
     A3: {
         width: 297,
         height: 420,
-
         printableWidth: 282,
         printableHeight: 405,
     },
@@ -56,36 +51,53 @@ export function BoardCanvas({
 }: BoardCanvasProps) {
     const canvasRef = useRef<HTMLElement>(null);
 
-    const [fitScale, setFitScale] = useState(1);
+    const [fitScale, setFitScale] =
+        useState(1);
 
-    const paper = PAPER_SIZES[paperSize];
+    const paper =
+        PAPER_SIZES[paperSize];
 
-    let width = paper.width;
-    let height = paper.height;
+    // -------------------------
+    // PAPER SIZE
+    // -------------------------
 
-    let printableWidth =
+    let paperWidthMm =
+        paper.width;
+
+    let paperHeightMm =
+        paper.height;
+
+    let printableWidthMm =
         paper.printableWidth;
 
-    let printableHeight =
+    let printableHeightMm =
         paper.printableHeight;
 
+    // Orientation csak Rectangle esetén számít.
     if (
         boardShape === "rectangle" &&
         orientation === "landscape"
     ) {
-        [width, height] = [
-            height,
-            width,
+        [
+            paperWidthMm,
+            paperHeightMm,
+        ] = [
+            paperHeightMm,
+            paperWidthMm,
         ];
 
         [
-            printableWidth,
-            printableHeight,
+            printableWidthMm,
+            printableHeightMm,
         ] = [
-                printableHeight,
-                printableWidth,
-            ];
+            printableHeightMm,
+            printableWidthMm,
+        ];
     }
+
+    // -------------------------
+    // FIT TO WINDOW
+    // -------------------------
 
     useEffect(() => {
         const canvas =
@@ -108,19 +120,18 @@ export function BoardCanvas({
 
             const widthScale =
                 availableWidth /
-                width;
+                paperWidthMm;
 
             const heightScale =
                 availableHeight /
-                height;
+                paperHeightMm;
 
-            const newScale =
+            setFitScale(
                 Math.min(
                     widthScale,
                     heightScale
-                );
-
-            setFitScale(newScale);
+                )
+            );
         };
 
         updateScale();
@@ -137,18 +148,31 @@ export function BoardCanvas({
         return () => {
             resizeObserver.disconnect();
         };
-    }, [width, height]);
+    }, [
+        paperWidthMm,
+        paperHeightMm,
+    ]);
+
+    // -------------------------
+    // DISPLAY SCALE
+    // -------------------------
 
     const zoom = 1;
 
     const displayScale =
         fitScale * zoom;
 
-    const paperWidth =
-        width * displayScale;
+    const paperDisplayWidth =
+        paperWidthMm *
+        displayScale;
 
-    const paperHeight =
-        height * displayScale;
+    const paperDisplayHeight =
+        paperHeightMm *
+        displayScale;
+
+    // -------------------------
+    // BOARD SIZE
+    // -------------------------
 
     let boardWidthMm: number;
     let boardHeightMm: number;
@@ -156,19 +180,17 @@ export function BoardCanvas({
     if (
         boardShape === "rectangle"
     ) {
-
         boardWidthMm =
-            printableWidth;
+            printableWidthMm;
 
         boardHeightMm =
-            printableHeight;
+            printableHeightMm;
     }
     else {
-
         const shapeSizeMm =
             Math.min(
-                printableWidth,
-                printableHeight
+                printableWidthMm,
+                printableHeightMm
             );
 
         boardWidthMm =
@@ -186,8 +208,19 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
+    // -------------------------
+    // SQUARE GRID
+    // -------------------------
+
+    const usesSquareGrid =
+        layout === "square-grid" &&
+        (
+            boardShape === "square" ||
+            boardShape === "rectangle"
+        );
+
     const squareGrid =
-        layout === "square-grid"
+        usesSquareGrid
             ? generateSquareGrid({
                 boardWidthMm,
                 boardHeightMm,
@@ -195,39 +228,71 @@ export function BoardCanvas({
             })
             : null;
 
-    const fieldSizeMm =
-        squareGrid
-            ? squareGrid.fieldSizeMm
-            : layout === "snake"
-                ? calculateSnakeFieldSize({
-                    boardWidthMm,
-                    boardHeightMm,
-                    boardShape,
-                    fieldCount,
-                })
-                : calculateFieldSize({
-                    boardWidthMm,
-                    boardHeightMm,
-                    boardShape,
-                    fieldCount,
-                });
+    // -------------------------
+    // FIELD SIZE
+    // -------------------------
 
-    const fieldPositions =
-        squareGrid
-            ? squareGrid.positions
-            : layout === "snake"
-                ? generateSnakeFields({
-                    boardWidthMm,
-                    boardHeightMm,
-                    boardShape,
-                    fieldCount,
-                })
-                : generatePerimeterFields({
-                    boardWidthMm,
-                    boardHeightMm,
-                    boardShape,
-                    fieldCount,
-                });
+    let fieldSizeMm: number;
+
+    if (squareGrid) {
+        fieldSizeMm =
+            squareGrid.fieldSizeMm;
+    }
+    else if (
+        layout === "snake"
+    ) {
+        fieldSizeMm =
+            calculateSnakeFieldSize({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
+    }
+    else {
+        fieldSizeMm =
+            calculateFieldSize({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
+    }
+
+    // -------------------------
+    // FIELD POSITIONS
+    // -------------------------
+
+    let fieldPositions;
+
+    if (squareGrid) {
+        fieldPositions =
+            squareGrid.positions;
+    }
+    else if (
+        layout === "snake"
+    ) {
+        fieldPositions =
+            generateSnakeFields({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
+    }
+    else {
+        fieldPositions =
+            generatePerimeterFields({
+                boardWidthMm,
+                boardHeightMm,
+                boardShape,
+                fieldCount,
+            });
+    }
+
+    // -------------------------
+    // RENDER
+    // -------------------------
 
     return (
         <main
@@ -238,8 +303,11 @@ export function BoardCanvas({
                 <div
                     className="paper"
                     style={{
-                        width: paperWidth,
-                        height: paperHeight,
+                        width:
+                            paperDisplayWidth,
+
+                        height:
+                            paperDisplayHeight,
                     }}
                 >
                     <div
@@ -259,10 +327,13 @@ export function BoardCanvas({
                             ) => (
                                 <div
                                     key={index}
-                                    className={`board-field ${layout === "square-grid"
-                                            ? "board-field-square"
-                                            : ""
-                                        }`}
+                                    className={
+                                        `board-field ${
+                                            usesSquareGrid
+                                                ? "board-field-square"
+                                                : ""
+                                        }`
+                                    }
                                     style={{
                                         width:
                                             fieldSizeMm *

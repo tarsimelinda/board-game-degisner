@@ -5,6 +5,11 @@ import {
     GRID_PRESET_SIZE,
 } from "../models/GridPreset";
 
+
+// =====================================================
+// COMMON TYPES
+// =====================================================
+
 export interface FieldPosition {
     x: number;
     y: number;
@@ -16,6 +21,11 @@ interface GenerateFieldsOptions {
     boardShape: BoardShape;
     fieldCount: number;
 }
+
+
+// =====================================================
+// PERIMETER FIELD SIZE
+// =====================================================
 
 export function calculateFieldSize({
     boardWidthMm,
@@ -32,16 +42,28 @@ export function calculateFieldSize({
     if (boardShape === "circle") {
         pathLengthMm =
             Math.PI * boardWidthMm;
-    } else {
+    }
+    else {
         pathLengthMm =
-            2 * (boardWidthMm + boardHeightMm);
+            2 * (
+                boardWidthMm +
+                boardHeightMm
+            );
     }
 
     return Math.min(
         18,
-        (pathLengthMm / fieldCount) * 0.7
+        (
+            pathLengthMm /
+            fieldCount
+        ) * 0.7
     );
 }
+
+
+// =====================================================
+// PERIMETER GENERATION
+// =====================================================
 
 export function generatePerimeterFields({
     boardWidthMm,
@@ -82,6 +104,11 @@ export function generatePerimeterFields({
     );
 }
 
+
+// =====================================================
+// CIRCLE PERIMETER
+// =====================================================
+
 function generateCircleFields(
     boardWidthMm: number,
     boardHeightMm: number,
@@ -111,7 +138,10 @@ function generateCircleFields(
         i++
     ) {
         const angle =
-            (i / fieldCount) *
+            (
+                i /
+                fieldCount
+            ) *
             Math.PI *
             2 -
             Math.PI / 2;
@@ -131,6 +161,11 @@ function generateCircleFields(
 
     return positions;
 }
+
+
+// =====================================================
+// RECTANGLE PERIMETER
+// =====================================================
 
 function generateRectangleFields(
     boardWidthMm: number,
@@ -152,7 +187,10 @@ function generateRectangleFields(
         fieldSizeMm;
 
     const perimeter =
-        2 * (pathWidth + pathHeight);
+        2 * (
+            pathWidth +
+            pathHeight
+        );
 
     for (
         let i = 0;
@@ -160,15 +198,19 @@ function generateRectangleFields(
         i++
     ) {
         let distance =
-            (i / fieldCount) *
+            (
+                i /
+                fieldCount
+            ) *
             perimeter;
 
         let x: number;
         let y: number;
 
-        // Top
+        // TOP
         if (
-            distance <= pathWidth
+            distance <=
+            pathWidth
         ) {
             x =
                 inset +
@@ -177,7 +219,7 @@ function generateRectangleFields(
             y = inset;
         }
 
-        // Right
+        // RIGHT
         else if (
             distance <=
             pathWidth +
@@ -195,7 +237,7 @@ function generateRectangleFields(
                 distance;
         }
 
-        // Bottom
+        // BOTTOM
         else if (
             distance <=
             pathWidth * 2 +
@@ -215,7 +257,7 @@ function generateRectangleFields(
                 inset;
         }
 
-        // Left
+        // LEFT
         else {
             distance -=
                 pathWidth * 2 +
@@ -238,6 +280,11 @@ function generateRectangleFields(
     return positions;
 }
 
+
+// =====================================================
+// SNAKE FIELD SIZE
+// =====================================================
+
 export function calculateSnakeFieldSize({
     boardWidthMm,
     boardHeightMm,
@@ -248,7 +295,8 @@ export function calculateSnakeFieldSize({
     }
 
     const aspectRatio =
-        boardWidthMm / boardHeightMm;
+        boardWidthMm /
+        boardHeightMm;
 
     const columns =
         Math.max(
@@ -263,14 +311,17 @@ export function calculateSnakeFieldSize({
 
     const rows =
         Math.ceil(
-            fieldCount / columns
+            fieldCount /
+            columns
         );
 
     const cellWidth =
-        boardWidthMm / columns;
+        boardWidthMm /
+        columns;
 
     const cellHeight =
-        boardHeightMm / rows;
+        boardHeightMm /
+        rows;
 
     return Math.min(
         18,
@@ -278,6 +329,11 @@ export function calculateSnakeFieldSize({
         cellHeight * 0.65
     );
 }
+
+
+// =====================================================
+// SNAKE GENERATION
+// =====================================================
 
 export function generateSnakeFields({
     boardWidthMm,
@@ -289,7 +345,8 @@ export function generateSnakeFields({
     }
 
     const aspectRatio =
-        boardWidthMm / boardHeightMm;
+        boardWidthMm /
+        boardHeightMm;
 
     const columns =
         Math.max(
@@ -304,16 +361,20 @@ export function generateSnakeFields({
 
     const rows =
         Math.ceil(
-            fieldCount / columns
+            fieldCount /
+            columns
         );
 
     const cellWidth =
-        boardWidthMm / columns;
+        boardWidthMm /
+        columns;
 
     const cellHeight =
-        boardHeightMm / rows;
+        boardHeightMm /
+        rows;
 
-    const positions: FieldPosition[] = [];
+    const positions:
+        FieldPosition[] = [];
 
     for (
         let i = 0;
@@ -321,10 +382,14 @@ export function generateSnakeFields({
         i++
     ) {
         const row =
-            Math.floor(i / columns);
+            Math.floor(
+                i /
+                columns
+            );
 
         const positionInRow =
-            i % columns;
+            i %
+            columns;
 
         const isReverseRow =
             row % 2 === 1;
@@ -332,18 +397,18 @@ export function generateSnakeFields({
         const column =
             isReverseRow
                 ? columns -
-                  1 -
-                  positionInRow
+                1 -
+                positionInRow
                 : positionInRow;
 
         const x =
             column *
-                cellWidth +
+            cellWidth +
             cellWidth / 2;
 
         const y =
             row *
-                cellHeight +
+            cellHeight +
             cellHeight / 2;
 
         positions.push({
@@ -354,6 +419,11 @@ export function generateSnakeFields({
 
     return positions;
 }
+
+
+// =====================================================
+// SQUARE GRID
+// =====================================================
 
 interface GenerateSquareGridOptions {
     boardWidthMm: number;
@@ -373,35 +443,98 @@ export function generateSquareGrid({
     boardHeightMm,
     preset,
 }: GenerateSquareGridOptions): SquareGridResult {
-    const gridSize =
+    const baseGridSize =
         GRID_PRESET_SIZE[preset];
 
-    const columns = gridSize;
-    const rows = gridSize;
-
-    // Mivel a board négyzet,
-    // ez mindkét irányban ugyanakkora lesz.
-    const fieldSizeMm =
+    /*
+     * A rövidebb oldalon:
+     *
+     * Large  = 5 mező
+     * Medium = 8 mező
+     * Small  = 13 mező
+     */
+    const shorterSide =
         Math.min(
-            boardWidthMm / columns,
-            boardHeightMm / rows
+            boardWidthMm,
+            boardHeightMm
         );
 
+    const fieldSizeMm =
+        shorterSide /
+        baseGridSize;
+
+    let columns: number;
+    let rows: number;
+
+    /*
+     * Álló Rectangle vagy Square:
+     *
+     * pl. 195 × 282
+     *
+     * Medium:
+     * 8 oszlop
+     * 11 sor
+     */
+    if (
+        boardWidthMm <=
+        boardHeightMm
+    ) {
+        columns =
+            baseGridSize;
+
+        rows =
+            Math.floor(
+                boardHeightMm /
+                fieldSizeMm
+            );
+    }
+
+    /*
+     * Fekvő Rectangle:
+     *
+     * pl. 282 × 195
+     *
+     * Medium:
+     * 11 oszlop
+     * 8 sor
+     */
+    else {
+        rows =
+            baseGridSize;
+
+        columns =
+            Math.floor(
+                boardWidthMm /
+                fieldSizeMm
+            );
+    }
+
     const gridWidth =
-        columns * fieldSizeMm;
+        columns *
+        fieldSizeMm;
 
     const gridHeight =
-        rows * fieldSizeMm;
+        rows *
+        fieldSizeMm;
 
-    // Ha később maradna fölösleges hely,
-    // mindig szimmetrikusan középre kerül.
+    /*
+     * A maradék hely mindig
+     * szimmetrikusan oszlik el.
+     */
     const offsetX =
-        (boardWidthMm - gridWidth) / 2;
+        (
+            boardWidthMm -
+            gridWidth
+        ) / 2;
 
     const offsetY =
-        (boardHeightMm - gridHeight) / 2;
+        (
+            boardHeightMm -
+            gridHeight
+        ) / 2;
 
-    const positions: FieldPosition[] = [];
+    const positions:
+        FieldPosition[] = [];
 
     for (
         let row = 0;
@@ -416,12 +549,14 @@ export function generateSquareGrid({
             positions.push({
                 x:
                     offsetX +
-                    column * fieldSizeMm +
+                    column *
+                    fieldSizeMm +
                     fieldSizeMm / 2,
 
                 y:
                     offsetY +
-                    row * fieldSizeMm +
+                    row *
+                    fieldSizeMm +
                     fieldSizeMm / 2,
             });
         }

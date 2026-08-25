@@ -108,7 +108,11 @@ export function PropertiesPanel({
                         if (newShape === "square") {
                             setLayout("square-grid");
                         }
-                        else if (layout === "square-grid") {
+
+                        if (
+                            newShape === "circle" &&
+                            layout === "square-grid"
+                        ) {
                             setLayout("perimeter");
                         }
                     }}
@@ -151,7 +155,7 @@ export function PropertiesPanel({
 
                     <option
                         value="square-grid"
-                        disabled={boardShape !== "square"}
+                        disabled={boardShape === "circle"}
                     >
                         Square Grid
                     </option>
