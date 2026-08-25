@@ -2,4 +2,5 @@ export type BoardLayout =
     | "perimeter"
     | "snake"
     | "square-grid"
-    | "monopoly-ring";
+    | "monopoly-ring"
+    | "mill-board";

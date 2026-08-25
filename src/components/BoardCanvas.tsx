@@ -16,6 +16,7 @@ import {
     generateSquareGrid,
     generateCircleGrid,
     generateMonopolyRing,
+    generateMillBoard,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -204,6 +205,18 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
+    const usesMillBoard =
+        layout === "mill-board" &&
+        boardShape === "square";
+
+    const millBoard =
+        usesMillBoard
+            ? generateMillBoard({
+                boardWidthMm,
+                boardHeightMm,
+            })
+            : null;
+
     const usesGrid =
         layout === "square-grid";
 
@@ -284,7 +297,10 @@ export function BoardCanvas({
 
     let fieldSizeMm = 0;
 
-    if (!usesMonopolyRing) {
+    if (
+        !usesMonopolyRing &&
+        !usesMillBoard
+    ) {
         if (grid) {
             fieldSizeMm =
                 grid.fieldSizeMm;
@@ -312,7 +328,8 @@ export function BoardCanvas({
     }
 
     const fieldPositions =
-        usesMonopolyRing
+        usesMonopolyRing ||
+            usesMillBoard
             ? []
             : grid
                 ? grid.positions
@@ -356,6 +373,64 @@ export function BoardCanvas({
                                 boardDisplayHeight,
                         }}
                     >
+
+                        {usesMillBoard &&
+                            millBoard?.lines.map(
+                                (line, index) => (
+                                    <div
+                                        key={`mill-line-${index}`}
+                                        className="mill-line"
+                                        style={{
+                                            left:
+                                                line.x1 *
+                                                displayScale,
+                                            top:
+                                                line.y1 *
+                                                displayScale,
+                                            width:
+                                                Math.hypot(
+                                                    line.x2 - line.x1,
+                                                    line.y2 - line.y1
+                                                ) * displayScale,
+                                            transform: `translate(0, -50%) rotate(${Math.atan2(
+                                                line.y2 - line.y1,
+                                                line.x2 - line.x1
+                                            )}rad)`,
+                                            transformOrigin:
+                                                "0 50%",
+                                        }}
+                                    />
+                                )
+                            )}
+
+                        {usesMillBoard &&
+                            millBoard?.points.map(
+                                (point, index) => (
+                                    <div
+                                        key={`mill-point-${index}`}
+                                        className="board-field board-field-mill"
+                                        style={{
+                                            width:
+                                                millBoard.pointSizeMm *
+                                                displayScale,
+
+                                            height:
+                                                millBoard.pointSizeMm *
+                                                displayScale,
+
+                                            left:
+                                                point.x *
+                                                displayScale,
+
+                                            top:
+                                                point.y *
+                                                displayScale,
+                                        }}
+                                    >
+                                        {/* később ide jöhet egyedi ikon vagy kép */}
+                                    </div>
+                                )
+                            )}
 
                         {usesMonopolyRing &&
                             monopolyFields.map(

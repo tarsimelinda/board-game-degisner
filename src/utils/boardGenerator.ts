@@ -17,6 +17,19 @@ export interface FieldGeometry {
     height: number;
 }
 
+export interface LineSegment {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+}
+
+export interface MillBoardResult {
+    points: FieldPosition[];
+    lines: LineSegment[];
+    pointSizeMm: number;
+}
+
 interface GenerateFieldsOptions {
     boardWidthMm: number;
     boardHeightMm: number;
@@ -825,4 +838,186 @@ export function generateMonopolyRing({
     }
 
     return fields;
+}
+
+interface GenerateMillBoardOptions {
+    boardWidthMm: number;
+    boardHeightMm: number;
+}
+
+export function generateMillBoard({
+    boardWidthMm,
+    boardHeightMm,
+}: GenerateMillBoardOptions): MillBoardResult {
+    const size =
+        Math.min(
+            boardWidthMm,
+            boardHeightMm
+        );
+
+    const center =
+        size / 2;
+
+    /*
+     * A három négyzet távolsága a széltől.
+     * Ezeket később finomíthatjuk.
+     */
+    const outerInset =
+        size * 0.08;
+
+    const middleInset =
+        size * 0.24;
+
+    const innerInset =
+        size * 0.40;
+
+    const pointSizeMm =
+        Math.max(
+            6,
+            size * 0.035
+        );
+
+    const squarePoints = (
+        inset: number
+    ): FieldPosition[] => {
+        const min = inset;
+        const max = size - inset;
+        const mid = center;
+
+        return [
+            // top row
+            { x: min, y: min },
+            { x: mid, y: min },
+            { x: max, y: min },
+
+            // middle row sides
+            { x: max, y: mid },
+            { x: max, y: max },
+
+            // bottom row
+            { x: mid, y: max },
+            { x: min, y: max },
+
+            // middle row side
+            { x: min, y: mid },
+        ];
+    };
+
+    const outerPoints =
+        squarePoints(outerInset);
+
+    const middlePoints =
+        squarePoints(middleInset);
+
+    const innerPoints =
+        squarePoints(innerInset);
+
+    const points = [
+        ...outerPoints,
+        ...middlePoints,
+        ...innerPoints,
+    ];
+
+    const squareLines = (
+        inset: number
+    ): LineSegment[] => {
+        const min = inset;
+        const max = size - inset;
+        const mid = center;
+
+        return [
+            // top
+            {
+                x1: min,
+                y1: min,
+                x2: max,
+                y2: min,
+            },
+            // right
+            {
+                x1: max,
+                y1: min,
+                x2: max,
+                y2: max,
+            },
+            // bottom
+            {
+                x1: max,
+                y1: max,
+                x2: min,
+                y2: max,
+            },
+            // left
+            {
+                x1: min,
+                y1: max,
+                x2: min,
+                y2: min,
+            },
+        ];
+    };
+
+    const lines: LineSegment[] = [
+        ...squareLines(outerInset),
+        ...squareLines(middleInset),
+        ...squareLines(innerInset),
+
+        // vertical connectors
+        {
+            x1: center,
+            y1: outerInset,
+            x2: center,
+            y2: middleInset,
+        },
+        {
+            x1: center,
+            y1: size - outerInset,
+            x2: center,
+            y2: size - middleInset,
+        },
+        {
+            x1: center,
+            y1: middleInset,
+            x2: center,
+            y2: innerInset,
+        },
+        {
+            x1: center,
+            y1: size - middleInset,
+            x2: center,
+            y2: size - innerInset,
+        },
+
+        // horizontal connectors
+        {
+            x1: outerInset,
+            y1: center,
+            x2: middleInset,
+            y2: center,
+        },
+        {
+            x1: size - outerInset,
+            y1: center,
+            x2: size - middleInset,
+            y2: center,
+        },
+        {
+            x1: middleInset,
+            y1: center,
+            x2: innerInset,
+            y2: center,
+        },
+        {
+            x1: size - middleInset,
+            y1: center,
+            x2: size - innerInset,
+            y2: center,
+        },
+    ];
+
+    return {
+        points,
+        lines,
+        pointSizeMm,
+    };
 }

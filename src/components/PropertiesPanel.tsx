@@ -144,6 +144,13 @@ export function PropertiesPanel({
                         ) {
                             setLayout("perimeter");
                         }
+
+                        if (
+                            newShape !== "square" &&
+                            layout === "mill-board"
+                        ) {
+                            setLayout("perimeter");
+                        }
                     }}
                 >
                     <option value="rectangle">
@@ -191,6 +198,13 @@ export function PropertiesPanel({
                         disabled={boardShape === "circle"}
                     >
                         Monopoly Ring
+                    </option>
+
+                    <option
+                        value="mill-board"
+                        disabled={boardShape !== "square"}
+                    >
+                        Mill Board
                     </option>
                 </select>
             </label>
