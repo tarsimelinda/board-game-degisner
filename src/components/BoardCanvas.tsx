@@ -26,7 +26,8 @@ interface BoardCanvasProps {
     layout: BoardLayout;
     gridPreset: GridPreset;
 
-    monopolySideFields: number;
+    monopolyShortSideFields: number;
+    monopolyLongSideFields: number;
     monopolyDepthPercent: number;
 }
 
@@ -53,7 +54,8 @@ export function BoardCanvas({
     fieldCount,
     layout,
     gridPreset,
-    monopolySideFields,
+    monopolyShortSideFields,
+    monopolyLongSideFields,
     monopolyDepthPercent,
 }: BoardCanvasProps) {
     const canvasRef =
@@ -77,7 +79,6 @@ export function BoardCanvas({
     let printableHeightMm =
         paper.printableHeight;
 
-    // Orientation csak Rectangle esetén számít.
     if (
         boardShape === "rectangle" &&
         orientation === "landscape"
@@ -86,22 +87,18 @@ export function BoardCanvas({
             paperWidthMm,
             paperHeightMm,
         ] = [
-            paperHeightMm,
-            paperWidthMm,
-        ];
+                paperHeightMm,
+                paperWidthMm,
+            ];
 
         [
             printableWidthMm,
             printableHeightMm,
         ] = [
-            printableHeightMm,
-            printableWidthMm,
-        ];
+                printableHeightMm,
+                printableWidthMm,
+            ];
     }
-
-    // =========================
-    // FIT TO WINDOW
-    // =========================
 
     useEffect(() => {
         const canvas =
@@ -157,10 +154,6 @@ export function BoardCanvas({
         paperHeightMm,
     ]);
 
-    // =========================
-    // DISPLAY SCALE
-    // =========================
-
     const zoom = 1;
 
     const displayScale =
@@ -173,10 +166,6 @@ export function BoardCanvas({
     const paperDisplayHeight =
         paperHeightMm *
         displayScale;
-
-    // =========================
-    // BOARD SIZE
-    // =========================
 
     let boardWidthMm: number;
     let boardHeightMm: number;
@@ -212,10 +201,6 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
-    // =========================
-    // GRID
-    // =========================
-
     const usesGrid =
         layout === "square-grid";
 
@@ -234,25 +219,48 @@ export function BoardCanvas({
                     preset: gridPreset,
                 });
 
-    // =========================
-    // MONOPOLY RING
-    // =========================
-
     const usesMonopolyRing =
         layout === "monopoly-ring" &&
-        boardShape === "square";
+        boardShape !== "circle";
 
-    /*
-     * Példa:
-     * A4 square = 195 mm
-     * 16% depth = 31.2 mm
-     */
     const monopolyDepthMm =
-        boardWidthMm *
+        Math.min(
+            boardWidthMm,
+            boardHeightMm
+        ) *
         (
             monopolyDepthPercent /
             100
         );
+
+    const isLandscapeBoard =
+        boardWidthMm >
+        boardHeightMm;
+
+    let monopolyHorizontalFields: number;
+    let monopolyVerticalFields: number;
+
+    if (boardShape === "square") {
+        monopolyHorizontalFields =
+            monopolyShortSideFields;
+
+        monopolyVerticalFields =
+            monopolyShortSideFields;
+    }
+    else if (isLandscapeBoard) {
+        monopolyHorizontalFields =
+            monopolyLongSideFields;
+
+        monopolyVerticalFields =
+            monopolyShortSideFields;
+    }
+    else {
+        monopolyHorizontalFields =
+            monopolyShortSideFields;
+
+        monopolyVerticalFields =
+            monopolyLongSideFields;
+    }
 
     const monopolyFields =
         usesMonopolyRing
@@ -260,17 +268,16 @@ export function BoardCanvas({
                 boardWidthMm,
                 boardHeightMm,
 
-                sideFieldsPerSide:
-                    monopolySideFields,
+                horizontalFields:
+                    monopolyHorizontalFields,
+
+                verticalFields:
+                    monopolyVerticalFields,
 
                 fieldDepthMm:
                     monopolyDepthMm,
             })
             : [];
-
-    // =========================
-    // NORMAL FIELD SIZE
-    // =========================
 
     let fieldSizeMm = 0;
 
@@ -301,10 +308,6 @@ export function BoardCanvas({
         }
     }
 
-    // =========================
-    // NORMAL FIELD POSITIONS
-    // =========================
-
     const fieldPositions =
         usesMonopolyRing
             ? []
@@ -323,10 +326,6 @@ export function BoardCanvas({
                         boardShape,
                         fieldCount,
                     });
-
-    // =========================
-    // RENDER
-    // =========================
 
     return (
         <main
@@ -354,7 +353,6 @@ export function BoardCanvas({
                                 boardDisplayHeight,
                         }}
                     >
-                        {/* MONOPOLY RING */}
 
                         {usesMonopolyRing &&
                             monopolyFields.map(
@@ -388,7 +386,6 @@ export function BoardCanvas({
                                 )
                             )}
 
-                        {/* OTHER LAYOUTS */}
 
                         {!usesMonopolyRing &&
                             fieldPositions.map(
@@ -399,10 +396,9 @@ export function BoardCanvas({
                                     <div
                                         key={index}
                                         className={
-                                            `board-field ${
-                                                usesGrid
-                                                    ? "board-field-square"
-                                                    : ""
+                                            `board-field ${usesGrid
+                                                ? "board-field-square"
+                                                : ""
                                             }`
                                         }
                                         style={{

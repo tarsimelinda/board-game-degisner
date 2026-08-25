@@ -32,9 +32,14 @@ function App() {
     useState<GridPreset>("medium");
 
   const [
-    monopolySideFields,
-    setMonopolySideFields,
+    monopolyShortSideFields,
+    setMonopolyShortSideFields,
   ] = useState(7);
+
+  const [
+    monopolyLongSideFields,
+    setMonopolyLongSideFields,
+  ] = useState(11);
 
   const [
     monopolyDepthPercent,
@@ -54,7 +59,8 @@ function App() {
           layout={layout}
           gridPreset={gridPreset}
 
-          monopolySideFields={monopolySideFields}
+          monopolyShortSideFields={monopolyShortSideFields}
+          monopolyLongSideFields={monopolyLongSideFields}
           monopolyDepthPercent={monopolyDepthPercent}
         />
 
@@ -77,8 +83,11 @@ function App() {
           gridPreset={gridPreset}
           setGridPreset={setGridPreset}
 
-          monopolySideFields={monopolySideFields}
-          setMonopolySideFields={setMonopolySideFields}
+          monopolyShortSideFields={monopolyShortSideFields}
+          setMonopolyShortSideFields={setMonopolyShortSideFields}
+
+          monopolyLongSideFields={monopolyLongSideFields}
+          setMonopolyLongSideFields={setMonopolyLongSideFields}
 
           monopolyDepthPercent={monopolyDepthPercent}
           setMonopolyDepthPercent={setMonopolyDepthPercent}

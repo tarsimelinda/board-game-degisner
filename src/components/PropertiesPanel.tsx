@@ -30,9 +30,14 @@ interface PropertiesPanelProps {
     gridPreset: GridPreset;
     setGridPreset: (preset: GridPreset) => void;
 
-    monopolySideFields: number;
+    monopolyShortSideFields: number;
 
-    setMonopolySideFields:
+    setMonopolyShortSideFields:
+    (count: number) => void;
+
+    monopolyLongSideFields: number;
+
+    setMonopolyLongSideFields:
     (count: number) => void;
 
     monopolyDepthPercent: number;
@@ -55,8 +60,11 @@ export function PropertiesPanel({
     gridPreset,
     setGridPreset,
     onGenerate,
-    monopolySideFields,
-    setMonopolySideFields,
+    monopolyShortSideFields,
+    setMonopolyShortSideFields,
+
+    monopolyLongSideFields,
+    setMonopolyLongSideFields,
 
     monopolyDepthPercent,
     setMonopolyDepthPercent,
@@ -125,7 +133,7 @@ export function PropertiesPanel({
                         }
 
                         if (
-                            newShape !== "square" &&
+                            newShape === "circle" &&
                             layout === "monopoly-ring"
                         ) {
                             setLayout("perimeter");
@@ -174,7 +182,7 @@ export function PropertiesPanel({
 
                     <option
                         value="monopoly-ring"
-                        disabled={boardShape !== "square"}
+                        disabled={boardShape === "circle"}
                     >
                         Monopoly Ring
                     </option>
@@ -184,39 +192,47 @@ export function PropertiesPanel({
             {layout === "monopoly-ring" && (
                 <>
                     <label>
-                        Fields per side
+                        Short side fields
 
                         <select
-                            value={monopolySideFields}
+                            value={monopolyShortSideFields}
                             onChange={(event) =>
-                                setMonopolySideFields(
-                                    Number(
-                                        event.target.value
-                                    )
+                                setMonopolyShortSideFields(
+                                    Number(event.target.value)
                                 )
                             }
                         >
-                            <option value={3}>
-                                3
-                            </option>
-
-                            <option value={5}>
-                                5
-                            </option>
-
-                            <option value={7}>
-                                7
-                            </option>
-
-                            <option value={9}>
-                                9
-                            </option>
-
-                            <option value={11}>
-                                11
-                            </option>
+                            <option value={3}>3</option>
+                            <option value={5}>5</option>
+                            <option value={7}>7</option>
+                            <option value={9}>9</option>
+                            <option value={11}>11</option>
+                            <option value={13}>13</option>
                         </select>
                     </label>
+
+                    {boardShape === "rectangle" && (
+                        <label>
+                            Long side fields
+
+                            <select
+                                value={monopolyLongSideFields}
+                                onChange={(event) =>
+                                    setMonopolyLongSideFields(
+                                        Number(event.target.value)
+                                    )
+                                }
+                            >
+                                <option value={5}>5</option>
+                                <option value={7}>7</option>
+                                <option value={9}>9</option>
+                                <option value={11}>11</option>
+                                <option value={13}>13</option>
+                                <option value={15}>15</option>
+                                <option value={17}>17</option>
+                            </select>
+                        </label>
+                    )}
 
                     <label>
                         Field depth
@@ -229,32 +245,24 @@ export function PropertiesPanel({
                             value={monopolyDepthPercent}
                             onChange={(event) =>
                                 setMonopolyDepthPercent(
-                                    Number(
-                                        event.target.value
-                                    )
+                                    Number(event.target.value)
                                 )
                             }
                         />
 
                         <span>
                             {monopolyDepthPercent}%
-                            {" — "}
-                            {(
-                                (
-                                    paperSize === "A4"
-                                        ? 195
-                                        : 282
-                                ) *
-                                monopolyDepthPercent /
-                                100
-                            ).toFixed(1)}
-                            {" mm"}
                         </span>
                     </label>
 
                     <div>
                         Total fields:{" "}
-                        {4 * monopolySideFields + 4}
+                        {boardShape === "rectangle"
+                            ? 4 +
+                            2 * monopolyShortSideFields +
+                            2 * monopolyLongSideFields
+                            : 4 +
+                            4 * monopolyShortSideFields}
                     </div>
                 </>
             )}

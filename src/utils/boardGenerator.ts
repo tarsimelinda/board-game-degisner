@@ -618,35 +618,32 @@ export function generateCircleGrid({
 interface GenerateMonopolyRingOptions {
     boardWidthMm: number;
     boardHeightMm: number;
-    sideFieldsPerSide: number;
+
+    horizontalFields: number;
+    verticalFields: number;
+
     fieldDepthMm: number;
 }
 
 export function generateMonopolyRing({
     boardWidthMm,
     boardHeightMm,
-    sideFieldsPerSide,
+    horizontalFields,
+    verticalFields,
     fieldDepthMm,
 }: GenerateMonopolyRingOptions): FieldGeometry[] {
     if (
-        sideFieldsPerSide <= 0 ||
-        sideFieldsPerSide % 2 === 0
+        horizontalFields <= 0 ||
+        verticalFields <= 0
     ) {
         return [];
     }
 
-    const boardSizeMm =
+    const maxDepth =
         Math.min(
             boardWidthMm,
             boardHeightMm
-        );
-
-    /*
-     * Matematikailag a depth csak addig nőhet,
-     * amíg marad hely az oldalsó mezőknek.
-     */
-    const maxDepth =
-        boardSizeMm / 2 - 0.01;
+        ) / 2 - 0.01;
 
     const depth =
         Math.min(
@@ -654,93 +651,79 @@ export function generateMonopolyRing({
             maxDepth
         );
 
-    /*
-     * Két sarokmező elvesz depth + depth
-     * helyet az oldalból.
-     *
-     * A maradékon osztoznak az oldalsó mezők.
-     */
-    const sideFieldWidth =
+    const horizontalFieldWidth =
         (
-            boardSizeMm -
+            boardWidthMm -
             2 * depth
         ) /
-        sideFieldsPerSide;
+        horizontalFields;
+
+    const verticalFieldHeight =
+        (
+            boardHeightMm -
+            2 * depth
+        ) /
+        verticalFields;
 
     const fields: FieldGeometry[] = [];
 
-    // ==========================================
-    // 1. BOTTOM-RIGHT CORNER
-    // ==========================================
-
     fields.push({
         x:
-            boardSizeMm -
+            boardWidthMm -
             depth / 2,
 
         y:
-            boardSizeMm -
+            boardHeightMm -
             depth / 2,
 
         width: depth,
         height: depth,
     });
 
-    // ==========================================
-    // 2. BOTTOM SIDE
-    // right -> left
-    // ==========================================
-
     for (
         let i = 0;
-        i < sideFieldsPerSide;
+        i < horizontalFields;
         i++
     ) {
         fields.push({
             x:
-                boardSizeMm -
+                boardWidthMm -
                 depth -
                 (
                     i + 0.5
                 ) *
-                sideFieldWidth,
+                horizontalFieldWidth,
 
             y:
-                boardSizeMm -
+                boardHeightMm -
                 depth / 2,
 
             width:
-                sideFieldWidth,
+                horizontalFieldWidth,
 
             height:
                 depth,
         });
     }
 
-    // ==========================================
-    // 3. BOTTOM-LEFT CORNER
-    // ==========================================
-
     fields.push({
         x:
             depth / 2,
 
         y:
-            boardSizeMm -
+            boardHeightMm -
             depth / 2,
 
-        width: depth,
-        height: depth,
-    });
+        width:
+            depth,
 
-    // ==========================================
-    // 4. LEFT SIDE
-    // bottom -> top
-    // ==========================================
+        height:
+            depth,
+    });
 
     for (
         let i = 0;
-        i < sideFieldsPerSide;
+        i < verticalFields;
         i++
     ) {
         fields.push({
@@ -748,24 +731,20 @@ export function generateMonopolyRing({
                 depth / 2,
 
             y:
-                boardSizeMm -
+                boardHeightMm -
                 depth -
                 (
                     i + 0.5
                 ) *
-                sideFieldWidth,
+                verticalFieldHeight,
 
             width:
                 depth,
 
             height:
-                sideFieldWidth,
+                verticalFieldHeight,
         });
     }
-
-    // ==========================================
-    // 5. TOP-LEFT CORNER
-    // ==========================================
 
     fields.push({
         x:
@@ -781,14 +760,9 @@ export function generateMonopolyRing({
             depth,
     });
 
-    // ==========================================
-    // 6. TOP SIDE
-    // left -> right
-    // ==========================================
-
     for (
         let i = 0;
-        i < sideFieldsPerSide;
+        i < horizontalFields;
         i++
     ) {
         fields.push({
@@ -797,26 +771,22 @@ export function generateMonopolyRing({
                 (
                     i + 0.5
                 ) *
-                sideFieldWidth,
+                horizontalFieldWidth,
 
             y:
                 depth / 2,
 
             width:
-                sideFieldWidth,
+                horizontalFieldWidth,
 
             height:
                 depth,
         });
     }
 
-    // ==========================================
-    // 7. TOP-RIGHT CORNER
-    // ==========================================
-
     fields.push({
         x:
-            boardSizeMm -
+            boardWidthMm -
             depth / 2,
 
         y:
@@ -829,19 +799,14 @@ export function generateMonopolyRing({
             depth,
     });
 
-    // ==========================================
-    // 8. RIGHT SIDE
-    // top -> bottom
-    // ==========================================
-
     for (
         let i = 0;
-        i < sideFieldsPerSide;
+        i < verticalFields;
         i++
     ) {
         fields.push({
             x:
-                boardSizeMm -
+                boardWidthMm -
                 depth / 2,
 
             y:
@@ -849,13 +814,13 @@ export function generateMonopolyRing({
                 (
                     i + 0.5
                 ) *
-                sideFieldWidth,
+                verticalFieldHeight,
 
             width:
                 depth,
 
             height:
-                sideFieldWidth,
+                verticalFieldHeight,
         });
     }
 
