@@ -29,6 +29,8 @@ interface BoardCanvasProps {
     monopolyShortSideFields: number;
     monopolyLongSideFields: number;
     monopolyDepthPercent: number;
+
+    showFieldNumbers: boolean;
 }
 
 const PAPER_SIZES = {
@@ -57,6 +59,7 @@ export function BoardCanvas({
     monopolyShortSideFields,
     monopolyLongSideFields,
     monopolyDepthPercent,
+    showFieldNumbers,
 }: BoardCanvasProps) {
     const canvasRef =
         useRef<HTMLElement>(null);
@@ -381,7 +384,11 @@ export function BoardCanvas({
                                                 displayScale,
                                         }}
                                     >
-                                        {index + 1}
+                                        {showFieldNumbers && (
+                                            <span className="field-number">
+                                                {index + 1}
+                                            </span>
+                                        )}
                                     </div>
                                 )
                             )}
@@ -419,7 +426,11 @@ export function BoardCanvas({
                                                 displayScale,
                                         }}
                                     >
-                                        {index + 1}
+                                        {showFieldNumbers && (
+                                            <span className="field-number">
+                                                {index + 1}
+                                            </span>
+                                        )}
                                     </div>
                                 )
                             )}

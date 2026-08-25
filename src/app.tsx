@@ -46,6 +46,9 @@ function App() {
     setMonopolyDepthPercent,
   ] = useState(16);
 
+  const [showFieldNumbers, setShowFieldNumbers] =
+    useState(true);
+
   return (
     <div className="app">
       <Toolbar />
@@ -62,6 +65,8 @@ function App() {
           monopolyShortSideFields={monopolyShortSideFields}
           monopolyLongSideFields={monopolyLongSideFields}
           monopolyDepthPercent={monopolyDepthPercent}
+
+          showFieldNumbers={showFieldNumbers}
         />
 
         <PropertiesPanel
@@ -91,6 +96,9 @@ function App() {
 
           monopolyDepthPercent={monopolyDepthPercent}
           setMonopolyDepthPercent={setMonopolyDepthPercent}
+
+          showFieldNumbers={showFieldNumbers}
+          setShowFieldNumbers={setShowFieldNumbers}
 
           onGenerate={() =>
             setGeneratedFieldCount(fieldCountInput)

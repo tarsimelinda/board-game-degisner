@@ -128,10 +128,6 @@ select {
 .board-field {
     position: absolute;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
     transform: translate(-50%, -50%);
 
     border: 1px solid #333;
@@ -151,4 +147,17 @@ select {
 
 .board-field-monopoly {
     border-radius: 0;
+}
+
+.field-number {
+    position: absolute;
+
+    top: 3px;
+    left: 4px;
+
+    font-size: 10px;
+    line-height: 1;
+
+    user-select: none;
+    pointer-events: none;
 }

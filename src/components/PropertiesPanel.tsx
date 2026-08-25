@@ -44,6 +44,9 @@ interface PropertiesPanelProps {
 
     setMonopolyDepthPercent:
     (depth: number) => void;
+
+    showFieldNumbers: boolean;
+    setShowFieldNumbers: (show: boolean) => void;
 }
 
 export function PropertiesPanel({
@@ -68,6 +71,9 @@ export function PropertiesPanel({
 
     monopolyDepthPercent,
     setMonopolyDepthPercent,
+
+    showFieldNumbers,
+    setShowFieldNumbers,
 }: PropertiesPanelProps) {
     return (
         <aside className="properties-panel">
@@ -187,6 +193,20 @@ export function PropertiesPanel({
                         Monopoly Ring
                     </option>
                 </select>
+            </label>
+
+            <label className="checkbox-label">
+                <input
+                    type="checkbox"
+                    checked={showFieldNumbers}
+                    onChange={(event) =>
+                        setShowFieldNumbers(
+                            event.target.checked
+                        )
+                    }
+                />
+
+                Show field numbers
             </label>
 
             {layout === "monopoly-ring" && (
