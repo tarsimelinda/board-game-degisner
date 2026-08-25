@@ -10,6 +10,8 @@ import { PaperSize, Orientation } from "./models/BoardProject";
 
 import { BoardLayout } from "./models/BoardLayout";
 
+import { GridPreset } from "./models/GridPreset";
+
 import "./styles/app.css";
 
 function App() {
@@ -26,6 +28,9 @@ function App() {
   const [layout, setLayout] =
     useState<BoardLayout>("perimeter");
 
+  const [gridPreset, setGridPreset] =
+    useState<GridPreset>("medium");
+
   return (
     <div className="app">
       <Toolbar />
@@ -37,6 +42,7 @@ function App() {
           boardShape={boardShape}
           fieldCount={generatedFieldCount}
           layout={layout}
+          gridPreset={gridPreset}
         />
 
         <PropertiesPanel
@@ -54,6 +60,9 @@ function App() {
 
           layout={layout}
           setLayout={setLayout}
+
+          gridPreset={gridPreset}
+          setGridPreset={setGridPreset}
 
           onGenerate={() =>
             setGeneratedFieldCount(fieldCountInput)

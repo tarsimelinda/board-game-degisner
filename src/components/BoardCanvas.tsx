@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { BoardShape } from "../models/BoardArea";
 
+import { GridPreset } from "../models/GridPreset";
+
 import {
     Orientation,
     PaperSize,
@@ -12,6 +14,7 @@ import {
     calculateSnakeFieldSize,
     generatePerimeterFields,
     generateSnakeFields,
+    generateSquareGrid,
 } from "../utils/boardGenerator";
 
 import { BoardLayout } from "../models/BoardLayout";
@@ -22,6 +25,7 @@ interface BoardCanvasProps {
     boardShape: BoardShape;
     fieldCount: number;
     layout: BoardLayout;
+    gridPreset: GridPreset;
 }
 
 const PAPER_SIZES = {
@@ -48,6 +52,7 @@ export function BoardCanvas({
     boardShape,
     fieldCount,
     layout,
+    gridPreset,
 }: BoardCanvasProps) {
     const canvasRef = useRef<HTMLElement>(null);
 
@@ -77,9 +82,9 @@ export function BoardCanvas({
             printableWidth,
             printableHeight,
         ] = [
-            printableHeight,
-            printableWidth,
-        ];
+                printableHeight,
+                printableWidth,
+            ];
     }
 
     useEffect(() => {
@@ -181,35 +186,48 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
-    const fieldSizeMm =
-        layout === "snake"
-            ? calculateSnakeFieldSize({
+    const squareGrid =
+        layout === "square-grid"
+            ? generateSquareGrid({
                 boardWidthMm,
                 boardHeightMm,
-                boardShape,
-                fieldCount,
+                preset: gridPreset,
             })
-            : calculateFieldSize({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
+            : null;
+
+    const fieldSizeMm =
+        squareGrid
+            ? squareGrid.fieldSizeMm
+            : layout === "snake"
+                ? calculateSnakeFieldSize({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                })
+                : calculateFieldSize({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                });
 
     const fieldPositions =
-        layout === "snake"
-            ? generateSnakeFields({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            })
-            : generatePerimeterFields({
-                boardWidthMm,
-                boardHeightMm,
-                boardShape,
-                fieldCount,
-            });
+        squareGrid
+            ? squareGrid.positions
+            : layout === "snake"
+                ? generateSnakeFields({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                })
+                : generatePerimeterFields({
+                    boardWidthMm,
+                    boardHeightMm,
+                    boardShape,
+                    fieldCount,
+                });
 
     return (
         <main
@@ -241,7 +259,10 @@ export function BoardCanvas({
                             ) => (
                                 <div
                                     key={index}
-                                    className="board-field"
+                                    className={`board-field ${layout === "square-grid"
+                                            ? "board-field-square"
+                                            : ""
+                                        }`}
                                     style={{
                                         width:
                                             fieldSizeMm *

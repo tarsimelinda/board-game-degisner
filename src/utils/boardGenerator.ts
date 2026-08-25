@@ -1,5 +1,10 @@
 import { BoardShape } from "../models/BoardArea";
 
+import {
+    GridPreset,
+    GRID_PRESET_SIZE,
+} from "../models/GridPreset";
+
 export interface FieldPosition {
     x: number;
     y: number;
@@ -348,4 +353,84 @@ export function generateSnakeFields({
     }
 
     return positions;
+}
+
+interface GenerateSquareGridOptions {
+    boardWidthMm: number;
+    boardHeightMm: number;
+    preset: GridPreset;
+}
+
+export interface SquareGridResult {
+    positions: FieldPosition[];
+    fieldSizeMm: number;
+    rows: number;
+    columns: number;
+}
+
+export function generateSquareGrid({
+    boardWidthMm,
+    boardHeightMm,
+    preset,
+}: GenerateSquareGridOptions): SquareGridResult {
+    const gridSize =
+        GRID_PRESET_SIZE[preset];
+
+    const columns = gridSize;
+    const rows = gridSize;
+
+    // Mivel a board négyzet,
+    // ez mindkét irányban ugyanakkora lesz.
+    const fieldSizeMm =
+        Math.min(
+            boardWidthMm / columns,
+            boardHeightMm / rows
+        );
+
+    const gridWidth =
+        columns * fieldSizeMm;
+
+    const gridHeight =
+        rows * fieldSizeMm;
+
+    // Ha később maradna fölösleges hely,
+    // mindig szimmetrikusan középre kerül.
+    const offsetX =
+        (boardWidthMm - gridWidth) / 2;
+
+    const offsetY =
+        (boardHeightMm - gridHeight) / 2;
+
+    const positions: FieldPosition[] = [];
+
+    for (
+        let row = 0;
+        row < rows;
+        row++
+    ) {
+        for (
+            let column = 0;
+            column < columns;
+            column++
+        ) {
+            positions.push({
+                x:
+                    offsetX +
+                    column * fieldSizeMm +
+                    fieldSizeMm / 2,
+
+                y:
+                    offsetY +
+                    row * fieldSizeMm +
+                    fieldSizeMm / 2,
+            });
+        }
+    }
+
+    return {
+        positions,
+        fieldSizeMm,
+        rows,
+        columns,
+    };
 }

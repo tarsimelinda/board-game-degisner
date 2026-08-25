@@ -2,6 +2,8 @@ import React from "react";
 
 import { BoardLayout } from "../models/BoardLayout";
 
+import { GridPreset } from "../models/GridPreset";
+
 import { BoardShape } from "../models/BoardArea";
 import {
     Orientation,
@@ -24,6 +26,9 @@ interface PropertiesPanelProps {
 
     layout: BoardLayout;
     setLayout: (layout: BoardLayout) => void;
+
+    gridPreset: GridPreset;
+    setGridPreset: (preset: GridPreset) => void;
 }
 
 export function PropertiesPanel({
@@ -37,6 +42,8 @@ export function PropertiesPanel({
     setFieldCount,
     layout,
     setLayout,
+    gridPreset,
+    setGridPreset,
     onGenerate,
 }: PropertiesPanelProps) {
     return (
@@ -92,11 +99,19 @@ export function PropertiesPanel({
 
                 <select
                     value={boardShape}
-                    onChange={(event) =>
-                        setBoardShape(
-                            event.target.value as BoardShape
-                        )
-                    }
+                    onChange={(event) => {
+                        const newShape =
+                            event.target.value as BoardShape;
+
+                        setBoardShape(newShape);
+
+                        if (newShape === "square") {
+                            setLayout("square-grid");
+                        }
+                        else if (layout === "square-grid") {
+                            setLayout("perimeter");
+                        }
+                    }}
                 >
                     <option value="rectangle">
                         Rectangle
@@ -133,24 +148,69 @@ export function PropertiesPanel({
                     >
                         Snake
                     </option>
+
+                    <option
+                        value="square-grid"
+                        disabled={boardShape !== "square"}
+                    >
+                        Square Grid
+                    </option>
                 </select>
             </label>
 
-            <label>
-                Number of fields
+            {layout === "square-grid" && (
+                <label>
+                    Grid size
 
-                <input
-                    type="number"
-                    min="2"
-                    max="500"
-                    value={fieldCount}
-                    onChange={(event) =>
-                        setFieldCount(
-                            Math.max(2, Number(event.target.value))
-                        )
-                    }
-                />
-            </label>
+                    <select
+                        value={gridPreset}
+                        onChange={(event) =>
+                            setGridPreset(
+                                event.target.value as GridPreset
+                            )
+                        }
+                    >
+                        <option value="large">
+                            Large — 5 × 5 (25 fields)
+                        </option>
+
+                        <option value="medium">
+                            Medium — 8 × 8 (64 fields)
+                        </option>
+
+                        <option value="small">
+                            Small — 13 × 13 (169 fields)
+                        </option>
+                    </select>
+                </label>
+            )}
+
+            {layout !== "square-grid" && (
+                <>
+                    <label>
+                        Number of fields
+
+                        <input
+                            type="number"
+                            min="2"
+                            max="500"
+                            value={fieldCount}
+                            onChange={(event) =>
+                                setFieldCount(
+                                    Math.max(
+                                        2,
+                                        Number(event.target.value)
+                                    )
+                                )
+                            }
+                        />
+                    </label>
+
+                    <button onClick={onGenerate}>
+                        Generate fields
+                    </button>
+                </>
+            )}
 
             <button onClick={onGenerate}>
                 Generate fields
