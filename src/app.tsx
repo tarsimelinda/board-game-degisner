@@ -18,7 +18,7 @@ function App() {
     useState<Orientation>("portrait");
 
   const [boardShape, setBoardShape] =
-    useState<BoardShape>("safe-page");
+    useState<BoardShape>("rectangle");
 
   const [fieldCountInput, setFieldCountInput] = useState(50);
   const [generatedFieldCount, setGeneratedFieldCount] = useState(0);

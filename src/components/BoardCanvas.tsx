@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { BoardShape } from "../models/BoardArea";
+
 import {
     Orientation,
     PaperSize,
@@ -23,24 +24,23 @@ interface BoardCanvasProps {
     layout: BoardLayout;
 }
 
-interface FieldPosition {
-    x: number;
-    y: number;
-}
-
 const PAPER_SIZES = {
     A4: {
         width: 210,
         height: 297,
+
+        printableWidth: 195,
+        printableHeight: 282,
     },
 
     A3: {
         width: 297,
         height: 420,
+
+        printableWidth: 282,
+        printableHeight: 405,
     },
 };
-
-const SAFE_MARGIN_MM = 15;
 
 export function BoardCanvas({
     paperSize,
@@ -58,12 +58,33 @@ export function BoardCanvas({
     let width = paper.width;
     let height = paper.height;
 
-    if (orientation === "landscape") {
-        [width, height] = [height, width];
+    let printableWidth =
+        paper.printableWidth;
+
+    let printableHeight =
+        paper.printableHeight;
+
+    if (
+        boardShape === "rectangle" &&
+        orientation === "landscape"
+    ) {
+        [width, height] = [
+            height,
+            width,
+        ];
+
+        [
+            printableWidth,
+            printableHeight,
+        ] = [
+            printableHeight,
+            printableWidth,
+        ];
     }
 
     useEffect(() => {
-        const canvas = canvasRef.current;
+        const canvas =
+            canvasRef.current;
 
         if (!canvas) {
             return;
@@ -73,21 +94,26 @@ export function BoardCanvas({
             const padding = 60;
 
             const availableWidth =
-                canvas.clientWidth - padding;
+                canvas.clientWidth -
+                padding;
 
             const availableHeight =
-                canvas.clientHeight - padding;
+                canvas.clientHeight -
+                padding;
 
             const widthScale =
-                availableWidth / width;
+                availableWidth /
+                width;
 
             const heightScale =
-                availableHeight / height;
+                availableHeight /
+                height;
 
-            const newScale = Math.min(
-                widthScale,
-                heightScale
-            );
+            const newScale =
+                Math.min(
+                    widthScale,
+                    heightScale
+                );
 
             setFitScale(newScale);
         };
@@ -95,9 +121,13 @@ export function BoardCanvas({
         updateScale();
 
         const resizeObserver =
-            new ResizeObserver(updateScale);
+            new ResizeObserver(
+                updateScale
+            );
 
-        resizeObserver.observe(canvas);
+        resizeObserver.observe(
+            canvas
+        );
 
         return () => {
             resizeObserver.disconnect();
@@ -115,69 +145,41 @@ export function BoardCanvas({
     const paperHeight =
         height * displayScale;
 
-    const safeAvailableWidth =
-        width - SAFE_MARGIN_MM * 2;
-
-    const safeAvailableHeight =
-        height - SAFE_MARGIN_MM * 2;
-
-    const paperAspectRatio =
-        width / height;
-
-    let safePageWidth =
-        safeAvailableWidth;
-
-    let safePageHeight =
-        safePageWidth / paperAspectRatio;
-
-    if (
-        safePageHeight >
-        safeAvailableHeight
-    ) {
-        safePageHeight =
-            safeAvailableHeight;
-
-        safePageWidth =
-            safePageHeight *
-            paperAspectRatio;
-    }
-
-    const maxSquareSizeMm =
-        Math.min(
-            safeAvailableWidth,
-            safeAvailableHeight
-        );
-
     let boardWidthMm: number;
     let boardHeightMm: number;
 
-    if (boardShape === "full-page") {
-        boardWidthMm = width;
-        boardHeightMm = height;
-    }
-    else if (
-        boardShape === "square" ||
-        boardShape === "circle"
+    if (
+        boardShape === "rectangle"
     ) {
+
         boardWidthMm =
-            maxSquareSizeMm;
+            printableWidth;
 
         boardHeightMm =
-            maxSquareSizeMm;
+            printableHeight;
     }
     else {
+
+        const shapeSizeMm =
+            Math.min(
+                printableWidth,
+                printableHeight
+            );
+
         boardWidthMm =
-            safePageWidth;
+            shapeSizeMm;
 
         boardHeightMm =
-            safePageHeight;
+            shapeSizeMm;
     }
 
     const boardDisplayWidth =
-        boardWidthMm * displayScale;
+        boardWidthMm *
+        displayScale;
 
     const boardDisplayHeight =
-        boardHeightMm * displayScale;
+        boardHeightMm *
+        displayScale;
 
     const fieldSizeMm =
         layout === "snake"
@@ -225,12 +227,18 @@ export function BoardCanvas({
                     <div
                         className={`board board-${boardShape}`}
                         style={{
-                            width: boardDisplayWidth,
-                            height: boardDisplayHeight,
+                            width:
+                                boardDisplayWidth,
+
+                            height:
+                                boardDisplayHeight,
                         }}
                     >
                         {fieldPositions.map(
-                            (field, index) => (
+                            (
+                                field,
+                                index
+                            ) => (
                                 <div
                                     key={index}
                                     className="board-field"

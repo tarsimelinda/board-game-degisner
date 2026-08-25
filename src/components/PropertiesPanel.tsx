@@ -49,55 +49,57 @@ export function PropertiesPanel({
                 <select
                     value={paperSize}
                     onChange={(event) =>
-                        setPaperSize(event.target.value as PaperSize)
-                    }
-                >
-                    <option value="A4">A4</option>
-                    <option value="A3">A3</option>
-                </select>
-            </label>
-
-            <label>
-                Orientation
-
-                <select
-                    value={orientation}
-                    onChange={(event) =>
-                        setOrientation(
-                            event.target.value as Orientation
+                        setPaperSize(
+                            event.target.value as PaperSize
                         )
                     }
                 >
-                    <option value="portrait">Portrait</option>
-                    <option value="landscape">Landscape</option>
+                    <option value="A4">
+                        A4 — 210 × 297 mm
+                    </option>
+
+                    <option value="A3">
+                        A3 — 297 × 420 mm
+                    </option>
                 </select>
             </label>
+
+            {boardShape === "rectangle" && (
+                <label>
+                    Orientation
+
+                    <select
+                        value={orientation}
+                        onChange={(event) =>
+                            setOrientation(
+                                event.target.value as Orientation
+                            )
+                        }
+                    >
+                        <option value="portrait">
+                            Portrait
+                        </option>
+
+                        <option value="landscape">
+                            Landscape
+                        </option>
+                    </select>
+                </label>
+            )}
 
             <label>
                 Board shape
 
                 <select
                     value={boardShape}
-                    onChange={(event) => {
-                        const newShape =
-                            event.target.value as BoardShape;
-
-                        setBoardShape(newShape);
-
-                        if (
-                            newShape === "circle" &&
-                            layout === "snake"
-                        ) {
-                            setLayout("perimeter");
-                        }
-                    }}
+                    onChange={(event) =>
+                        setBoardShape(
+                            event.target.value as BoardShape
+                        )
+                    }
                 >
-                    <option value="safe-page">
-                        Safe page
-                    </option>
-
-                    <option value="full-page">
-                        Full page
+                    <option value="rectangle">
+                        Rectangle
                     </option>
 
                     <option value="square">
@@ -106,10 +108,6 @@ export function PropertiesPanel({
 
                     <option value="circle">
                         Circle
-                    </option>
-
-                    <option value="custom">
-                        Custom
                     </option>
                 </select>
             </label>

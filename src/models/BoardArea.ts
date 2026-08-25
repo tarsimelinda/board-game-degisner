@@ -1,9 +1,7 @@
 export type BoardShape =
-    | "full-page"
-    | "safe-page"
+    | "rectangle"
     | "square"
-    | "circle"
-    | "custom";
+    | "circle";
 
 export interface BoardArea {
     shape: BoardShape;
