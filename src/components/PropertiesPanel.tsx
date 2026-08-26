@@ -1,10 +1,9 @@
 import React from "react";
 
 import { BoardLayout } from "../models/BoardLayout";
-
 import { GridPreset } from "../models/GridPreset";
-
 import { BoardShape } from "../models/BoardArea";
+
 import {
     Orientation,
     PaperSize,
@@ -31,38 +30,43 @@ interface PropertiesPanelProps {
     setGridPreset: (preset: GridPreset) => void;
 
     monopolyShortSideFields: number;
-
     setMonopolyShortSideFields:
     (count: number) => void;
 
     monopolyLongSideFields: number;
-
     setMonopolyLongSideFields:
     (count: number) => void;
 
     monopolyDepthPercent: number;
-
     setMonopolyDepthPercent:
     (depth: number) => void;
 
     showFieldNumbers: boolean;
-    setShowFieldNumbers: (show: boolean) => void;
+    setShowFieldNumbers:
+    (show: boolean) => void;
 }
 
 export function PropertiesPanel({
     paperSize,
     setPaperSize,
+
     orientation,
     setOrientation,
+
     boardShape,
     setBoardShape,
+
     fieldCount,
     setFieldCount,
+
     layout,
     setLayout,
+
     gridPreset,
     setGridPreset,
+
     onGenerate,
+
     monopolyShortSideFields,
     setMonopolyShortSideFields,
 
@@ -75,9 +79,29 @@ export function PropertiesPanel({
     showFieldNumbers,
     setShowFieldNumbers,
 }: PropertiesPanelProps) {
+
+    /*
+     * Different layouts need different settings.
+     *
+     * For now we keep this logic here.
+     * Later these settings can be split into
+     * separate components.
+     */
+    const usesGridSettings =
+        layout === "square-grid";
+
+    const usesManualFieldCount =
+        layout === "perimeter" ||
+        layout === "snake";
+
+    const canShowFieldNumbers =
+        layout !== "mill-board";
+
     return (
         <aside className="properties-panel">
             <h2>Board</h2>
+
+            {/* PAPER SIZE */}
 
             <label>
                 Paper size
@@ -99,6 +123,8 @@ export function PropertiesPanel({
                     </option>
                 </select>
             </label>
+
+            {/* ORIENTATION */}
 
             {boardShape === "rectangle" && (
                 <label>
@@ -123,6 +149,8 @@ export function PropertiesPanel({
                 </label>
             )}
 
+            {/* BOARD SHAPE */}
+
             <label>
                 Board shape
 
@@ -134,10 +162,18 @@ export function PropertiesPanel({
 
                         setBoardShape(newShape);
 
+                        /*
+                         * Square currently defaults
+                         * to Square Grid.
+                         */
                         if (newShape === "square") {
                             setLayout("square-grid");
                         }
 
+                        /*
+                         * Monopoly Ring is not
+                         * supported on circles.
+                         */
                         if (
                             newShape === "circle" &&
                             layout === "monopoly-ring"
@@ -145,6 +181,10 @@ export function PropertiesPanel({
                             setLayout("perimeter");
                         }
 
+                        /*
+                         * Mill Board currently only
+                         * supports square boards.
+                         */
                         if (
                             newShape !== "square" &&
                             layout === "mill-board"
@@ -167,6 +207,8 @@ export function PropertiesPanel({
                 </select>
             </label>
 
+            {/* LAYOUT */}
+
             <label>
                 Layout
 
@@ -184,7 +226,9 @@ export function PropertiesPanel({
 
                     <option
                         value="snake"
-                        disabled={boardShape === "circle"}
+                        disabled={
+                            boardShape === "circle"
+                        }
                     >
                         Snake
                     </option>
@@ -195,33 +239,72 @@ export function PropertiesPanel({
 
                     <option
                         value="monopoly-ring"
-                        disabled={boardShape === "circle"}
+                        disabled={
+                            boardShape === "circle"
+                        }
                     >
                         Monopoly Ring
                     </option>
 
                     <option
                         value="mill-board"
-                        disabled={boardShape !== "square"}
+                        disabled={
+                            boardShape !== "square"
+                        }
                     >
                         Mill Board
                     </option>
                 </select>
             </label>
 
-            <label className="checkbox-label">
-                <input
-                    type="checkbox"
-                    checked={showFieldNumbers}
-                    onChange={(event) =>
-                        setShowFieldNumbers(
-                            event.target.checked
-                        )
-                    }
-                />
+            {/* FIELD NUMBERS */}
 
-                Show field numbers
-            </label>
+            {canShowFieldNumbers && (
+                <label className="checkbox-label">
+                    <input
+                        type="checkbox"
+                        checked={showFieldNumbers}
+                        onChange={(event) =>
+                            setShowFieldNumbers(
+                                event.target.checked
+                            )
+                        }
+                    />
+
+                    Show field numbers
+                </label>
+            )}
+
+            {/* SQUARE GRID SETTINGS */}
+
+            {usesGridSettings && (
+                <label>
+                    Grid size
+
+                    <select
+                        value={gridPreset}
+                        onChange={(event) =>
+                            setGridPreset(
+                                event.target.value as GridPreset
+                            )
+                        }
+                    >
+                        <option value="large">
+                            Large — 5 × 5
+                        </option>
+
+                        <option value="medium">
+                            Medium — 8 × 8
+                        </option>
+
+                        <option value="small">
+                            Small — 13 × 13
+                        </option>
+                    </select>
+                </label>
+            )}
+
+            {/* MONOPOLY RING SETTINGS */}
 
             {layout === "monopoly-ring" && (
                 <>
@@ -229,19 +312,40 @@ export function PropertiesPanel({
                         Short side fields
 
                         <select
-                            value={monopolyShortSideFields}
+                            value={
+                                monopolyShortSideFields
+                            }
                             onChange={(event) =>
                                 setMonopolyShortSideFields(
-                                    Number(event.target.value)
+                                    Number(
+                                        event.target.value
+                                    )
                                 )
                             }
                         >
-                            <option value={3}>3</option>
-                            <option value={5}>5</option>
-                            <option value={7}>7</option>
-                            <option value={9}>9</option>
-                            <option value={11}>11</option>
-                            <option value={13}>13</option>
+                            <option value={3}>
+                                3
+                            </option>
+
+                            <option value={5}>
+                                5
+                            </option>
+
+                            <option value={7}>
+                                7
+                            </option>
+
+                            <option value={9}>
+                                9
+                            </option>
+
+                            <option value={11}>
+                                11
+                            </option>
+
+                            <option value={13}>
+                                13
+                            </option>
                         </select>
                     </label>
 
@@ -250,20 +354,44 @@ export function PropertiesPanel({
                             Long side fields
 
                             <select
-                                value={monopolyLongSideFields}
+                                value={
+                                    monopolyLongSideFields
+                                }
                                 onChange={(event) =>
                                     setMonopolyLongSideFields(
-                                        Number(event.target.value)
+                                        Number(
+                                            event.target.value
+                                        )
                                     )
                                 }
                             >
-                                <option value={5}>5</option>
-                                <option value={7}>7</option>
-                                <option value={9}>9</option>
-                                <option value={11}>11</option>
-                                <option value={13}>13</option>
-                                <option value={15}>15</option>
-                                <option value={17}>17</option>
+                                <option value={5}>
+                                    5
+                                </option>
+
+                                <option value={7}>
+                                    7
+                                </option>
+
+                                <option value={9}>
+                                    9
+                                </option>
+
+                                <option value={11}>
+                                    11
+                                </option>
+
+                                <option value={13}>
+                                    13
+                                </option>
+
+                                <option value={15}>
+                                    15
+                                </option>
+
+                                <option value={17}>
+                                    17
+                                </option>
                             </select>
                         </label>
                     )}
@@ -276,62 +404,47 @@ export function PropertiesPanel({
                             min="8"
                             max="40"
                             step="1"
-                            value={monopolyDepthPercent}
+                            value={
+                                monopolyDepthPercent
+                            }
                             onChange={(event) =>
                                 setMonopolyDepthPercent(
-                                    Number(event.target.value)
+                                    Number(
+                                        event.target.value
+                                    )
                                 )
                             }
                         />
 
                         <span>
-                            {monopolyDepthPercent}%
+                            {
+                                monopolyDepthPercent
+                            }%
                         </span>
                     </label>
 
                     <div>
                         Total fields:{" "}
-                        {boardShape === "rectangle"
-                            ? 4 +
-                            2 * monopolyShortSideFields +
-                            2 * monopolyLongSideFields
-                            : 4 +
-                            4 * monopolyShortSideFields}
+                        {
+                            boardShape ===
+                                "rectangle"
+                                ? 4 +
+                                2 *
+                                monopolyShortSideFields +
+                                2 *
+                                monopolyLongSideFields
+
+                                : 4 +
+                                4 *
+                                monopolyShortSideFields
+                        }
                     </div>
                 </>
             )}
 
-            {
-                layout !== "square-grid" &&
-                layout !== "monopoly-ring" &&
-                (
-                    <label>
-                        Grid size
+            {/* MANUAL FIELD GENERATION */}
 
-                        <select
-                            value={gridPreset}
-                            onChange={(event) =>
-                                setGridPreset(
-                                    event.target.value as GridPreset
-                                )
-                            }
-                        >
-                            <option value="large">
-                                Large — 5 × 5 (25 fields)
-                            </option>
-
-                            <option value="medium">
-                                Medium — 8 × 8 (64 fields)
-                            </option>
-
-                            <option value="small">
-                                Small — 13 × 13 (169 fields)
-                            </option>
-                        </select>
-                    </label>
-                )}
-
-            {layout !== "square-grid" && (
+            {usesManualFieldCount && (
                 <>
                     <label>
                         Number of fields
@@ -345,22 +458,22 @@ export function PropertiesPanel({
                                 setFieldCount(
                                     Math.max(
                                         2,
-                                        Number(event.target.value)
+                                        Number(
+                                            event.target.value
+                                        )
                                     )
                                 )
                             }
                         />
                     </label>
 
-                    <button onClick={onGenerate}>
+                    <button
+                        onClick={onGenerate}
+                    >
                         Generate fields
                     </button>
                 </>
             )}
-
-            <button onClick={onGenerate}>
-                Generate fields
-            </button>
         </aside>
     );
 }

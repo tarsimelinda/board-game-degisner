@@ -858,10 +858,6 @@ export function generateMillBoard({
     const center =
         size / 2;
 
-    /*
-     * A három négyzet távolsága a széltől.
-     * Ezeket később finomíthatjuk.
-     */
     const outerInset =
         size * 0.08;
 
@@ -885,20 +881,16 @@ export function generateMillBoard({
         const mid = center;
 
         return [
-            // top row
             { x: min, y: min },
             { x: mid, y: min },
             { x: max, y: min },
 
-            // middle row sides
             { x: max, y: mid },
             { x: max, y: max },
 
-            // bottom row
             { x: mid, y: max },
             { x: min, y: max },
 
-            // middle row side
             { x: min, y: mid },
         ];
     };
@@ -926,28 +918,24 @@ export function generateMillBoard({
         const mid = center;
 
         return [
-            // top
             {
                 x1: min,
                 y1: min,
                 x2: max,
                 y2: min,
             },
-            // right
             {
                 x1: max,
                 y1: min,
                 x2: max,
                 y2: max,
             },
-            // bottom
             {
                 x1: max,
                 y1: max,
                 x2: min,
                 y2: max,
             },
-            // left
             {
                 x1: min,
                 y1: max,
@@ -962,7 +950,6 @@ export function generateMillBoard({
         ...squareLines(middleInset),
         ...squareLines(innerInset),
 
-        // vertical connectors
         {
             x1: center,
             y1: outerInset,
@@ -988,7 +975,6 @@ export function generateMillBoard({
             y2: size - innerInset,
         },
 
-        // horizontal connectors
         {
             x1: outerInset,
             y1: center,

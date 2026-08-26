@@ -427,7 +427,6 @@ export function BoardCanvas({
                                                 displayScale,
                                         }}
                                     >
-                                        {/* később ide jöhet egyedi ikon vagy kép */}
                                     </div>
                                 )
                             )}
