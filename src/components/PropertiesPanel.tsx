@@ -5,6 +5,10 @@ import { GridPreset } from "../models/GridPreset";
 import { BoardShape } from "../models/BoardArea";
 
 import {
+    LAYOUT_CONFIG,
+} from "../config/layoutConfig";
+
+import {
     Orientation,
     PaperSize,
 } from "../models/BoardProject";
@@ -79,29 +83,28 @@ export function PropertiesPanel({
     showFieldNumbers,
     setShowFieldNumbers,
 }: PropertiesPanelProps) {
+    const currentLayoutConfig =
+        LAYOUT_CONFIG[layout];
 
-    /*
-     * Different layouts need different settings.
-     *
-     * For now we keep this logic here.
-     * Later these settings can be split into
-     * separate components.
-     */
     const usesGridSettings =
-        layout === "square-grid";
+        currentLayoutConfig.settingsType ===
+        "grid";
 
     const usesManualFieldCount =
-        layout === "perimeter" ||
-        layout === "snake";
+        currentLayoutConfig.settingsType ===
+        "manual-fields";
+
+    const usesMonopolySettings =
+        currentLayoutConfig.settingsType ===
+        "monopoly";
 
     const canShowFieldNumbers =
-        layout !== "mill-board";
+        currentLayoutConfig.canShowFieldNumbers;
 
     return (
         <aside className="properties-panel">
             <h2>Board</h2>
 
-            {/* PAPER SIZE */}
 
             <label>
                 Paper size
@@ -124,7 +127,6 @@ export function PropertiesPanel({
                 </select>
             </label>
 
-            {/* ORIENTATION */}
 
             {boardShape === "rectangle" && (
                 <label>
@@ -149,7 +151,6 @@ export function PropertiesPanel({
                 </label>
             )}
 
-            {/* BOARD SHAPE */}
 
             <label>
                 Board shape
@@ -162,33 +163,12 @@ export function PropertiesPanel({
 
                         setBoardShape(newShape);
 
-                        /*
-                         * Square currently defaults
-                         * to Square Grid.
-                         */
-                        if (newShape === "square") {
-                            setLayout("square-grid");
-                        }
+                        const layoutIsSupported =
+                            currentLayoutConfig.allowedShapes.includes(
+                                newShape
+                            );
 
-                        /*
-                         * Monopoly Ring is not
-                         * supported on circles.
-                         */
-                        if (
-                            newShape === "circle" &&
-                            layout === "monopoly-ring"
-                        ) {
-                            setLayout("perimeter");
-                        }
-
-                        /*
-                         * Mill Board currently only
-                         * supports square boards.
-                         */
-                        if (
-                            newShape !== "square" &&
-                            layout === "mill-board"
-                        ) {
+                        if (!layoutIsSupported) {
                             setLayout("perimeter");
                         }
                     }}
@@ -207,7 +187,6 @@ export function PropertiesPanel({
                 </select>
             </label>
 
-            {/* LAYOUT */}
 
             <label>
                 Layout
@@ -220,44 +199,34 @@ export function PropertiesPanel({
                         )
                     }
                 >
-                    <option value="perimeter">
-                        Perimeter
-                    </option>
-
-                    <option
-                        value="snake"
-                        disabled={
-                            boardShape === "circle"
-                        }
-                    >
-                        Snake
-                    </option>
-
-                    <option value="square-grid">
-                        Square Grid
-                    </option>
-
-                    <option
-                        value="monopoly-ring"
-                        disabled={
-                            boardShape === "circle"
-                        }
-                    >
-                        Monopoly Ring
-                    </option>
-
-                    <option
-                        value="mill-board"
-                        disabled={
-                            boardShape !== "square"
-                        }
-                    >
-                        Mill Board
-                    </option>
+                    {(
+                        Object.entries(
+                            LAYOUT_CONFIG
+                        ) as [
+                            BoardLayout,
+                            typeof currentLayoutConfig
+                        ][]
+                    ).map(
+                        ([
+                            layoutValue,
+                            config,
+                        ]) => (
+                            <option
+                                key={layoutValue}
+                                value={layoutValue}
+                                disabled={
+                                    !config.allowedShapes.includes(
+                                        boardShape
+                                    )
+                                }
+                            >
+                                {config.label}
+                            </option>
+                        )
+                    )}
                 </select>
             </label>
 
-            {/* FIELD NUMBERS */}
 
             {canShowFieldNumbers && (
                 <label className="checkbox-label">
@@ -275,7 +244,6 @@ export function PropertiesPanel({
                 </label>
             )}
 
-            {/* SQUARE GRID SETTINGS */}
 
             {usesGridSettings && (
                 <label>
@@ -304,9 +272,8 @@ export function PropertiesPanel({
                 </label>
             )}
 
-            {/* MONOPOLY RING SETTINGS */}
 
-            {layout === "monopoly-ring" && (
+            {usesMonopolySettings && (
                 <>
                     <label>
                         Short side fields
@@ -442,7 +409,6 @@ export function PropertiesPanel({
                 </>
             )}
 
-            {/* MANUAL FIELD GENERATION */}
 
             {usesManualFieldCount && (
                 <>

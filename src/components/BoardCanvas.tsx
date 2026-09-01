@@ -17,6 +17,7 @@ import {
     generateCircleGrid,
     generateMonopolyRing,
     generateMillBoard,
+    generateTicTacToeBoard,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -217,6 +218,18 @@ export function BoardCanvas({
             })
             : null;
 
+    const usesTicTacToe =
+        layout === "tic-tac-toe" &&
+        boardShape === "square";
+
+    const ticTacToeBoard =
+        usesTicTacToe
+            ? generateTicTacToeBoard({
+                boardWidthMm,
+                boardHeightMm,
+            })
+            : null;
+
     const usesGrid =
         layout === "square-grid";
 
@@ -299,7 +312,8 @@ export function BoardCanvas({
 
     if (
         !usesMonopolyRing &&
-        !usesMillBoard
+        !usesMillBoard &&
+        !usesTicTacToe
     ) {
         if (grid) {
             fieldSizeMm =
@@ -329,7 +343,8 @@ export function BoardCanvas({
 
     const fieldPositions =
         usesMonopolyRing ||
-            usesMillBoard
+            usesMillBoard ||
+            usesTicTacToe
             ? []
             : grid
                 ? grid.positions
@@ -364,7 +379,9 @@ export function BoardCanvas({
                     }}
                 >
                     <div
-                        className={`board board-${boardShape}`}
+                        className={
+                            `board board-${boardShape} board-layout-${layout}`
+                        }
                         style={{
                             width:
                                 boardDisplayWidth,
@@ -428,6 +445,40 @@ export function BoardCanvas({
                                         }}
                                     >
                                     </div>
+                                )
+                            )}
+
+                        {usesTicTacToe &&
+                            ticTacToeBoard?.lines.map(
+                                (line, index) => (
+                                    <div
+                                        key={`tic-tac-toe-line-${index}`}
+                                        className="tic-tac-toe-line"
+                                        style={{
+                                            left:
+                                                line.x1 *
+                                                displayScale,
+
+                                            top:
+                                                line.y1 *
+                                                displayScale,
+
+                                            width:
+                                                Math.hypot(
+                                                    line.x2 - line.x1,
+                                                    line.y2 - line.y1
+                                                ) *
+                                                displayScale,
+
+                                            transform: `translate(0, -50%) rotate(${Math.atan2(
+                                                line.y2 - line.y1,
+                                                line.x2 - line.x1
+                                            )}rad)`,
+
+                                            transformOrigin:
+                                                "0 50%",
+                                        }}
+                                    />
                                 )
                             )}
 

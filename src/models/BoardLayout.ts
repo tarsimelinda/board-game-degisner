@@ -3,4 +3,5 @@ export type BoardLayout =
     | "snake"
     | "square-grid"
     | "monopoly-ring"
-    | "mill-board";
+    | "mill-board"
+    | "tic-tac-toe";

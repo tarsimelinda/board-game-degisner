@@ -174,3 +174,17 @@ select {
     background: white;
     border: 2px solid #333;
 }
+
+.tic-tac-toe-line {
+    position: absolute;
+
+    height: 3px;
+
+    background: #333;
+
+    pointer-events: none;
+}
+
+.board-layout-tic-tac-toe {
+    border: none;
+}

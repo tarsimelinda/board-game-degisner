@@ -37,6 +37,10 @@ interface GenerateFieldsOptions {
     fieldCount: number;
 }
 
+export interface TicTacToeBoardResult {
+    lines: LineSegment[];
+}
+
 export function calculateFieldSize({
     boardWidthMm,
     boardHeightMm,
@@ -1005,5 +1009,61 @@ export function generateMillBoard({
         points,
         lines,
         pointSizeMm,
+    };
+}
+
+interface GenerateTicTacToeBoardOptions {
+    boardWidthMm: number;
+    boardHeightMm: number;
+}
+
+export function generateTicTacToeBoard({
+    boardWidthMm,
+    boardHeightMm,
+}: GenerateTicTacToeBoardOptions): TicTacToeBoardResult {
+    const size =
+        Math.min(
+            boardWidthMm,
+            boardHeightMm
+        );
+
+    const oneThird =
+        size / 3;
+
+    const twoThirds =
+        oneThird * 2;
+
+    const lines: LineSegment[] = [
+        {
+            x1: oneThird,
+            y1: 0,
+            x2: oneThird,
+            y2: size,
+        },
+
+        {
+            x1: twoThirds,
+            y1: 0,
+            x2: twoThirds,
+            y2: size,
+        },
+
+        {
+            x1: 0,
+            y1: oneThird,
+            x2: size,
+            y2: oneThird,
+        },
+
+        {
+            x1: 0,
+            y1: twoThirds,
+            x2: size,
+            y2: twoThirds,
+        },
+    ];
+
+    return {
+        lines,
     };
 }
