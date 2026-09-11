@@ -5,6 +5,7 @@ export type LayoutSettingsType =
     | "manual-fields"
     | "grid"
     | "monopoly"
+    | "custom-path"
     | "none";
 
 interface LayoutConfig {
@@ -108,5 +109,21 @@ export const LAYOUT_CONFIG:
 
         canShowFieldNumbers:
             false,
+    },
+
+    "custom-path": {
+        label: "Custom Path",
+
+        allowedShapes: [
+            "rectangle",
+            "square",
+            "circle",
+        ],
+
+        settingsType:
+            "custom-path",
+
+        canShowFieldNumbers:
+            true,
     },
 };

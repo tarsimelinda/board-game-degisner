@@ -4,4 +4,5 @@ export type BoardLayout =
     | "square-grid"
     | "monopoly-ring"
     | "mill-board"
-    | "tic-tac-toe";
+    | "tic-tac-toe"
+    | "custom-path";

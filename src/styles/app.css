@@ -188,3 +188,34 @@ select {
 .board-layout-tic-tac-toe {
     border: none;
 }
+
+.board-layout-custom-path {
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.custom-path-svg {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+.custom-path-source {
+    fill: none;
+
+    stroke: #555;
+    stroke-width: 2;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.custom-path-field {
+    border-radius: 50%;
+}

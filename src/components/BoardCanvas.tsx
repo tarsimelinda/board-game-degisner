@@ -9,6 +9,10 @@ import {
 import { BoardLayout } from "../models/BoardLayout";
 
 import {
+    PathPoint,
+} from "../models/CustomPath";
+
+import {
     calculateFieldSize,
     calculateSnakeFieldSize,
     generatePerimeterFields,
@@ -18,6 +22,7 @@ import {
     generateMonopolyRing,
     generateMillBoard,
     generateTicTacToeBoard,
+    generateFieldsAlongPath,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -33,6 +38,14 @@ interface BoardCanvasProps {
     monopolyDepthPercent: number;
 
     showFieldNumbers: boolean;
+    customPathPoints: PathPoint[];
+
+    generatedCustomPathPoints: PathPoint[];
+
+    customPathFieldSizeMm: number;
+
+    onCustomPathChange:
+    (points: PathPoint[]) => void;
 }
 
 const PAPER_SIZES = {
@@ -62,12 +75,22 @@ export function BoardCanvas({
     monopolyLongSideFields,
     monopolyDepthPercent,
     showFieldNumbers,
+
+    customPathPoints,
+    generatedCustomPathPoints,
+    onCustomPathChange,
+    customPathFieldSizeMm,
 }: BoardCanvasProps) {
     const canvasRef =
         useRef<HTMLElement>(null);
 
     const [fitScale, setFitScale] =
         useState(1);
+
+    const [
+        isDrawingCustomPath,
+        setIsDrawingCustomPath,
+    ] = useState(false);
 
     const paper =
         PAPER_SIZES[paperSize];
@@ -206,6 +229,170 @@ export function BoardCanvas({
         boardHeightMm *
         displayScale;
 
+    const usesCustomPath =
+        layout === "custom-path";
+
+    const getCustomPathPoint = (
+        event:
+            React.PointerEvent<HTMLDivElement>
+    ): PathPoint => {
+        const rect =
+            event.currentTarget
+                .getBoundingClientRect();
+
+        const relativeX =
+            (
+                event.clientX -
+                rect.left
+            ) /
+            rect.width;
+
+        const relativeY =
+            (
+                event.clientY -
+                rect.top
+            ) /
+            rect.height;
+
+        return {
+            x:
+                Math.max(
+                    0,
+                    Math.min(
+                        boardWidthMm,
+                        relativeX *
+                        boardWidthMm
+                    )
+                ),
+
+            y:
+                Math.max(
+                    0,
+                    Math.min(
+                        boardHeightMm,
+                        relativeY *
+                        boardHeightMm
+                    )
+                ),
+        };
+    };
+
+    const handleCustomPathPointerDown = (
+        event:
+            React.PointerEvent<HTMLDivElement>
+    ) => {
+        if (!usesCustomPath) {
+            return;
+        }
+
+        event.currentTarget
+            .setPointerCapture(
+                event.pointerId
+            );
+
+        const point =
+            getCustomPathPoint(
+                event
+            );
+
+        onCustomPathChange([
+            point,
+        ]);
+
+        setIsDrawingCustomPath(
+            true
+        );
+    };
+
+    const handleCustomPathPointerMove = (
+        event:
+            React.PointerEvent<HTMLDivElement>
+    ) => {
+        if (
+            !usesCustomPath ||
+            !isDrawingCustomPath
+        ) {
+            return;
+        }
+
+        const point =
+            getCustomPathPoint(
+                event
+            );
+
+        const previousPoint =
+            customPathPoints[
+            customPathPoints.length - 1
+            ];
+
+        if (!previousPoint) {
+            onCustomPathChange([
+                point,
+            ]);
+
+            return;
+        }
+
+        const distance =
+            Math.hypot(
+                point.x -
+                previousPoint.x,
+
+                point.y -
+                previousPoint.y
+            );
+
+        const minimumDistanceMm =
+            1.5;
+
+        if (
+            distance <
+            minimumDistanceMm
+        ) {
+            return;
+        }
+
+        onCustomPathChange([
+            ...customPathPoints,
+            point,
+        ]);
+    };
+
+    const handleCustomPathPointerUp = (
+        event:
+            React.PointerEvent<HTMLDivElement>
+    ) => {
+        if (!usesCustomPath) {
+            return;
+        }
+
+        setIsDrawingCustomPath(
+            false
+        );
+
+        if (
+            event.currentTarget
+                .hasPointerCapture(
+                    event.pointerId
+                )
+        ) {
+            event.currentTarget
+                .releasePointerCapture(
+                    event.pointerId
+                );
+        }
+    };
+
+    const customPathFields =
+        usesCustomPath
+            ? generateFieldsAlongPath({
+                points:
+                    generatedCustomPathPoints,
+
+                fieldCount,
+            })
+            : [];
+
     const usesMillBoard =
         layout === "mill-board" &&
         boardShape === "square";
@@ -313,7 +500,8 @@ export function BoardCanvas({
     if (
         !usesMonopolyRing &&
         !usesMillBoard &&
-        !usesTicTacToe
+        !usesTicTacToe &&
+        !usesCustomPath
     ) {
         if (grid) {
             fieldSizeMm =
@@ -344,7 +532,8 @@ export function BoardCanvas({
     const fieldPositions =
         usesMonopolyRing ||
             usesMillBoard ||
-            usesTicTacToe
+            usesTicTacToe ||
+            usesCustomPath
             ? []
             : grid
                 ? grid.positions
@@ -389,7 +578,92 @@ export function BoardCanvas({
                             height:
                                 boardDisplayHeight,
                         }}
+
+                        onPointerDown={
+                            handleCustomPathPointerDown
+                        }
+
+                        onPointerMove={
+                            handleCustomPathPointerMove
+                        }
+
+                        onPointerUp={
+                            handleCustomPathPointerUp
+                        }
+
+                        onPointerCancel={
+                            handleCustomPathPointerUp
+                        }
                     >
+
+                        {usesCustomPath &&
+                            customPathPoints.length >= 2 && (
+                                <svg
+                                    className="custom-path-svg"
+
+                                    viewBox={
+                                        `0 0 ${boardWidthMm} ${boardHeightMm}`
+                                    }
+
+                                    preserveAspectRatio="none"
+                                >
+                                    <polyline
+                                        className="custom-path-source"
+
+                                        points={
+                                            customPathPoints
+                                                .map(
+                                                    (point) =>
+                                                        `${point.x},${point.y}`
+                                                )
+                                                .join(" ")
+                                        }
+                                    />
+                                </svg>
+                            )}
+
+
+                        {usesCustomPath &&
+                            customPathFields.map(
+                                (
+                                    field,
+                                    index
+                                ) => (
+                                    <div
+                                        key={
+                                            `custom-path-${index}`
+                                        }
+
+                                        className={
+                                            "board-field custom-path-field"
+                                        }
+
+                                        style={{
+                                            width:
+                                                customPathFieldSizeMm *
+                                                displayScale,
+
+                                            height:
+                                                customPathFieldSizeMm *
+                                                displayScale,
+
+                                            left:
+                                                field.x *
+                                                displayScale,
+
+                                            top:
+                                                field.y *
+                                                displayScale,
+                                        }}
+                                    >
+                                        {showFieldNumbers && (
+                                            <span className="field-number">
+                                                {index + 1}
+                                            </span>
+                                        )}
+                                    </div>
+                                )
+                            )}
 
                         {usesMillBoard &&
                             millBoard?.lines.map(
@@ -520,6 +794,9 @@ export function BoardCanvas({
 
 
                         {!usesMonopolyRing &&
+                            !usesMillBoard &&
+                            !usesTicTacToe &&
+                            !usesCustomPath &&
                             fieldPositions.map(
                                 (
                                     field,

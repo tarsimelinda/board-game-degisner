@@ -15,23 +15,34 @@ import {
 
 interface PropertiesPanelProps {
     paperSize: PaperSize;
-    setPaperSize: (size: PaperSize) => void;
+    setPaperSize:
+    (size: PaperSize) => void;
 
     orientation: Orientation;
-    setOrientation: (orientation: Orientation) => void;
+    setOrientation:
+    (orientation: Orientation) => void;
 
     boardShape: BoardShape;
-    setBoardShape: (shape: BoardShape) => void;
+    setBoardShape:
+    (shape: BoardShape) => void;
 
     fieldCount: number;
-    setFieldCount: (count: number) => void;
-    onGenerate: () => void;
+    setFieldCount:
+    (count: number) => void;
+
+    onGenerate:
+    () => void;
+
+    onClearCustomPath:
+    () => void;
 
     layout: BoardLayout;
-    setLayout: (layout: BoardLayout) => void;
+    setLayout:
+    (layout: BoardLayout) => void;
 
     gridPreset: GridPreset;
-    setGridPreset: (preset: GridPreset) => void;
+    setGridPreset:
+    (preset: GridPreset) => void;
 
     monopolyShortSideFields: number;
     setMonopolyShortSideFields:
@@ -48,6 +59,13 @@ interface PropertiesPanelProps {
     showFieldNumbers: boolean;
     setShowFieldNumbers:
     (show: boolean) => void;
+
+    customPathFieldSizeMm: number;
+
+    setCustomPathFieldSizeMm:
+    (size: number) => void;
+
+    customPathRecommendedMax: number;
 }
 
 export function PropertiesPanel({
@@ -63,13 +81,14 @@ export function PropertiesPanel({
     fieldCount,
     setFieldCount,
 
+    onGenerate,
+    onClearCustomPath,
+
     layout,
     setLayout,
 
     gridPreset,
     setGridPreset,
-
-    onGenerate,
 
     monopolyShortSideFields,
     setMonopolyShortSideFields,
@@ -82,6 +101,11 @@ export function PropertiesPanel({
 
     showFieldNumbers,
     setShowFieldNumbers,
+
+    customPathFieldSizeMm,
+    setCustomPathFieldSizeMm,
+
+    customPathRecommendedMax,
 }: PropertiesPanelProps) {
     const currentLayoutConfig =
         LAYOUT_CONFIG[layout];
@@ -98,13 +122,16 @@ export function PropertiesPanel({
         currentLayoutConfig.settingsType ===
         "monopoly";
 
+    const usesCustomPathSettings =
+        currentLayoutConfig.settingsType ===
+        "custom-path";
+
     const canShowFieldNumbers =
         currentLayoutConfig.canShowFieldNumbers;
 
     return (
         <aside className="properties-panel">
             <h2>Board</h2>
-
 
             <label>
                 Paper size
@@ -126,7 +153,6 @@ export function PropertiesPanel({
                     </option>
                 </select>
             </label>
-
 
             {boardShape === "rectangle" && (
                 <label>
@@ -151,7 +177,6 @@ export function PropertiesPanel({
                 </label>
             )}
 
-
             <label>
                 Board shape
 
@@ -161,15 +186,23 @@ export function PropertiesPanel({
                         const newShape =
                             event.target.value as BoardShape;
 
-                        setBoardShape(newShape);
+                        setBoardShape(
+                            newShape
+                        );
 
                         const layoutIsSupported =
-                            currentLayoutConfig.allowedShapes.includes(
-                                newShape
-                            );
+                            currentLayoutConfig
+                                .allowedShapes
+                                .includes(
+                                    newShape
+                                );
 
-                        if (!layoutIsSupported) {
-                            setLayout("perimeter");
+                        if (
+                            !layoutIsSupported
+                        ) {
+                            setLayout(
+                                "perimeter"
+                            );
                         }
                     }}
                 >
@@ -186,7 +219,6 @@ export function PropertiesPanel({
                     </option>
                 </select>
             </label>
-
 
             <label>
                 Layout
@@ -212,30 +244,40 @@ export function PropertiesPanel({
                             config,
                         ]) => (
                             <option
-                                key={layoutValue}
-                                value={layoutValue}
+                                key={
+                                    layoutValue
+                                }
+                                value={
+                                    layoutValue
+                                }
                                 disabled={
-                                    !config.allowedShapes.includes(
-                                        boardShape
-                                    )
+                                    !config
+                                        .allowedShapes
+                                        .includes(
+                                            boardShape
+                                        )
                                 }
                             >
-                                {config.label}
+                                {
+                                    config.label
+                                }
                             </option>
                         )
                     )}
                 </select>
             </label>
 
-
             {canShowFieldNumbers && (
                 <label className="checkbox-label">
                     <input
                         type="checkbox"
-                        checked={showFieldNumbers}
+                        checked={
+                            showFieldNumbers
+                        }
                         onChange={(event) =>
                             setShowFieldNumbers(
-                                event.target.checked
+                                event.target
+                                    .checked
                             )
                         }
                     />
@@ -243,7 +285,6 @@ export function PropertiesPanel({
                     Show field numbers
                 </label>
             )}
-
 
             {usesGridSettings && (
                 <label>
@@ -272,7 +313,6 @@ export function PropertiesPanel({
                 </label>
             )}
 
-
             {usesMonopolySettings && (
                 <>
                     <label>
@@ -285,7 +325,8 @@ export function PropertiesPanel({
                             onChange={(event) =>
                                 setMonopolyShortSideFields(
                                     Number(
-                                        event.target.value
+                                        event.target
+                                            .value
                                     )
                                 )
                             }
@@ -316,52 +357,55 @@ export function PropertiesPanel({
                         </select>
                     </label>
 
-                    {boardShape === "rectangle" && (
-                        <label>
-                            Long side fields
+                    {boardShape ===
+                        "rectangle" && (
+                            <label>
+                                Long side fields
 
-                            <select
-                                value={
-                                    monopolyLongSideFields
-                                }
-                                onChange={(event) =>
-                                    setMonopolyLongSideFields(
-                                        Number(
-                                            event.target.value
+                                <select
+                                    value={
+                                        monopolyLongSideFields
+                                    }
+                                    onChange={(event) =>
+                                        setMonopolyLongSideFields(
+                                            Number(
+                                                event
+                                                    .target
+                                                    .value
+                                            )
                                         )
-                                    )
-                                }
-                            >
-                                <option value={5}>
-                                    5
-                                </option>
+                                    }
+                                >
+                                    <option value={5}>
+                                        5
+                                    </option>
 
-                                <option value={7}>
-                                    7
-                                </option>
+                                    <option value={7}>
+                                        7
+                                    </option>
 
-                                <option value={9}>
-                                    9
-                                </option>
+                                    <option value={9}>
+                                        9
+                                    </option>
 
-                                <option value={11}>
-                                    11
-                                </option>
+                                    <option value={11}>
+                                        11
+                                    </option>
 
-                                <option value={13}>
-                                    13
-                                </option>
+                                    <option value={13}>
+                                        13
+                                    </option>
 
-                                <option value={15}>
-                                    15
-                                </option>
+                                    <option value={15}>
+                                        15
+                                    </option>
 
-                                <option value={17}>
-                                    17
-                                </option>
-                            </select>
-                        </label>
-                    )}
+                                    <option value={17}>
+                                        17
+                                    </option>
+                                </select>
+                            </label>
+                        )}
 
                     <label>
                         Field depth
@@ -377,7 +421,8 @@ export function PropertiesPanel({
                             onChange={(event) =>
                                 setMonopolyDepthPercent(
                                     Number(
-                                        event.target.value
+                                        event.target
+                                            .value
                                     )
                                 )
                             }
@@ -400,7 +445,6 @@ export function PropertiesPanel({
                                 monopolyShortSideFields +
                                 2 *
                                 monopolyLongSideFields
-
                                 : 4 +
                                 4 *
                                 monopolyShortSideFields
@@ -409,6 +453,93 @@ export function PropertiesPanel({
                 </>
             )}
 
+            {usesCustomPathSettings && (
+                <>
+                    <div className="custom-path-help">
+                        Draw a path directly
+                        on the board.
+                    </div>
+
+                    <label>
+                        Field size
+
+                        <input
+                            type="range"
+                            min="5"
+                            max="25"
+                            step="1"
+                            value={
+                                customPathFieldSizeMm
+                            }
+                            onChange={(event) =>
+                                setCustomPathFieldSizeMm(
+                                    Number(
+                                        event.target.value
+                                    )
+                                )
+                            }
+                        />
+
+                        <span>
+                            {
+                                customPathFieldSizeMm
+                            } mm
+                        </span>
+                    </label>
+
+                    <div>
+                        Recommended maximum:{" "}
+                        {
+                            customPathRecommendedMax > 0
+                                ? customPathRecommendedMax
+                                : "Draw a path first"
+                        }
+                    </div>
+
+                    <label>
+                        Number of fields
+
+                        <input
+                            type="number"
+                            min="2"
+                            max="500"
+                            value={
+                                fieldCount
+                            }
+                            onChange={(event) =>
+                                setFieldCount(
+                                    Math.max(
+                                        2,
+                                        Number(
+                                            event
+                                                .target
+                                                .value
+                                        )
+                                    )
+                                )
+                            }
+                        />
+                    </label>
+
+                    <button
+                        type="button"
+                        onClick={
+                            onGenerate
+                        }
+                    >
+                        Generate path
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={
+                            onClearCustomPath
+                        }
+                    >
+                        Clear drawing
+                    </button>
+                </>
+            )}
 
             {usesManualFieldCount && (
                 <>
@@ -419,13 +550,17 @@ export function PropertiesPanel({
                             type="number"
                             min="2"
                             max="500"
-                            value={fieldCount}
+                            value={
+                                fieldCount
+                            }
                             onChange={(event) =>
                                 setFieldCount(
                                     Math.max(
                                         2,
                                         Number(
-                                            event.target.value
+                                            event
+                                                .target
+                                                .value
                                         )
                                     )
                                 )
@@ -434,7 +569,10 @@ export function PropertiesPanel({
                     </label>
 
                     <button
-                        onClick={onGenerate}
+                        type="button"
+                        onClick={
+                            onGenerate
+                        }
                     >
                         Generate fields
                     </button>

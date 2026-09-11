@@ -1,5 +1,7 @@
 import { BoardShape } from "../models/BoardArea";
 
+import { PathPoint } from "../models/CustomPath";
+
 import {
     GridPreset,
     GRID_PRESET_SIZE,
@@ -1066,4 +1068,308 @@ export function generateTicTacToeBoard({
     return {
         lines,
     };
+}
+
+interface GenerateFieldsAlongPathOptions {
+    points: PathPoint[];
+    fieldCount: number;
+}
+
+export function generateFieldsAlongPath({
+    points,
+    fieldCount,
+}: GenerateFieldsAlongPathOptions): FieldPosition[] {
+    if (
+        points.length < 2 ||
+        fieldCount < 2
+    ) {
+        return [];
+    }
+
+    const segments: {
+        start: PathPoint;
+        end: PathPoint;
+        length: number;
+    }[] = [];
+
+    let totalLength = 0;
+
+    for (
+        let i = 0;
+        i < points.length - 1;
+        i++
+    ) {
+        const start =
+            points[i];
+
+        const end =
+            points[i + 1];
+
+        const dx =
+            end.x - start.x;
+
+        const dy =
+            end.y - start.y;
+
+        const length =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+        if (length <= 0.001) {
+            continue;
+        }
+
+        segments.push({
+            start,
+            end,
+            length,
+        });
+
+        totalLength +=
+            length;
+    }
+
+    if (
+        segments.length === 0 ||
+        totalLength === 0
+    ) {
+        return [];
+    }
+
+    const fields:
+        FieldPosition[] = [];
+
+    const spacing =
+        totalLength /
+        (fieldCount - 1);
+
+    let currentSegmentIndex = 0;
+    let distanceBeforeSegment = 0;
+
+    for (
+        let fieldIndex = 0;
+        fieldIndex < fieldCount;
+        fieldIndex++
+    ) {
+        const targetDistance =
+            Math.min(
+                fieldIndex * spacing,
+                totalLength
+            );
+
+        while (
+            currentSegmentIndex <
+            segments.length - 1 &&
+            distanceBeforeSegment +
+            segments[currentSegmentIndex].length <
+            targetDistance
+        ) {
+            distanceBeforeSegment +=
+                segments[
+                    currentSegmentIndex
+                ].length;
+
+            currentSegmentIndex++;
+        }
+
+        const segment =
+            segments[
+            currentSegmentIndex
+            ];
+
+        const distanceInsideSegment =
+            targetDistance -
+            distanceBeforeSegment;
+
+        const ratio =
+            Math.min(
+                1,
+                distanceInsideSegment /
+                segment.length
+            );
+
+        fields.push({
+            x:
+                segment.start.x +
+                (
+                    segment.end.x -
+                    segment.start.x
+                ) *
+                ratio,
+
+            y:
+                segment.start.y +
+                (
+                    segment.end.y -
+                    segment.start.y
+                ) *
+                ratio,
+        });
+    }
+
+    return fields;
+}
+
+export function calculatePathLength(
+    points: PathPoint[]
+): number {
+    let totalLength = 0;
+
+    for (
+        let i = 0;
+        i < points.length - 1;
+        i++
+    ) {
+        totalLength +=
+            Math.hypot(
+                points[i + 1].x -
+                    points[i].x,
+
+                points[i + 1].y -
+                    points[i].y
+            );
+    }
+
+    return totalLength;
+}
+
+interface CalculateRecommendedMaxFieldsOptions {
+    points: PathPoint[];
+    fieldSizeMm: number;
+    minimumGapMm?: number;
+}
+
+export function calculateRecommendedMaxFields({
+    points,
+    fieldSizeMm,
+    minimumGapMm = 1,
+}: CalculateRecommendedMaxFieldsOptions): number {
+    if (
+        points.length < 2 ||
+        fieldSizeMm <= 0
+    ) {
+        return 0;
+    }
+
+    const pathLength =
+        calculatePathLength(
+            points
+        );
+
+    if (pathLength <= 0) {
+        return 0;
+    }
+
+    const requiredSpacing =
+        fieldSizeMm +
+        minimumGapMm;
+
+    return Math.max(
+        2,
+        Math.floor(
+            pathLength /
+                requiredSpacing
+        ) + 1
+    );
+}
+
+function fieldsOverlap(
+    fields: FieldPosition[],
+    fieldSizeMm: number,
+    minimumGapMm: number
+): boolean {
+    const minimumDistance =
+        fieldSizeMm +
+        minimumGapMm;
+
+    for (
+        let i = 0;
+        i < fields.length;
+        i++
+    ) {
+        for (
+            let j = i + 1;
+            j < fields.length;
+            j++
+        ) {
+            const distance =
+                Math.hypot(
+                    fields[i].x -
+                        fields[j].x,
+
+                    fields[i].y -
+                        fields[j].y
+                );
+
+            if (
+                distance <
+                minimumDistance
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+interface FindSafeFieldCountOptions {
+    points: PathPoint[];
+    requestedFieldCount: number;
+    fieldSizeMm: number;
+    minimumGapMm?: number;
+}
+
+export function findSafeFieldCount({
+    points,
+    requestedFieldCount,
+    fieldSizeMm,
+    minimumGapMm = 1,
+}: FindSafeFieldCountOptions): number {
+    if (
+        points.length < 2 ||
+        requestedFieldCount < 2
+    ) {
+        return 0;
+    }
+
+    const recommendedMax =
+        calculateRecommendedMaxFields({
+            points,
+            fieldSizeMm,
+            minimumGapMm,
+        });
+
+    let candidateCount =
+        Math.min(
+            requestedFieldCount,
+            recommendedMax
+        );
+
+    while (
+        candidateCount >= 2
+    ) {
+        const fields =
+            generateFieldsAlongPath({
+                points,
+                fieldCount:
+                    candidateCount,
+            });
+
+        if (
+            !fieldsOverlap(
+                fields,
+                fieldSizeMm,
+                minimumGapMm
+            )
+        ) {
+            return candidateCount;
+        }
+
+        candidateCount--;
+    }
+
+    return 0;
 }
