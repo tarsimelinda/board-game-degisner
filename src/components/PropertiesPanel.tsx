@@ -65,7 +65,13 @@ interface PropertiesPanelProps {
     setCustomPathFieldSizeMm:
     (size: number) => void;
 
-    customPathRecommendedMax: number;
+    preventFieldOverlap: boolean;
+
+    setPreventFieldOverlap:
+    (prevent: boolean) => void;
+
+    customPathMessage:
+    string | null;
 }
 
 export function PropertiesPanel({
@@ -105,7 +111,10 @@ export function PropertiesPanel({
     customPathFieldSizeMm,
     setCustomPathFieldSizeMm,
 
-    customPathRecommendedMax,
+    preventFieldOverlap,
+    setPreventFieldOverlap,
+
+    customPathMessage,
 }: PropertiesPanelProps) {
     const currentLayoutConfig =
         LAYOUT_CONFIG[layout];
@@ -487,15 +496,6 @@ export function PropertiesPanel({
                         </span>
                     </label>
 
-                    <div>
-                        Recommended maximum:{" "}
-                        {
-                            customPathRecommendedMax > 0
-                                ? customPathRecommendedMax
-                                : "Draw a path first"
-                        }
-                    </div>
-
                     <label>
                         Number of fields
 
@@ -511,15 +511,43 @@ export function PropertiesPanel({
                                     Math.max(
                                         2,
                                         Number(
-                                            event
-                                                .target
-                                                .value
+                                            event.target.value
                                         )
                                     )
                                 )
                             }
                         />
                     </label>
+
+                    <label className="checkbox-label">
+                        <input
+                            type="checkbox"
+                            checked={
+                                preventFieldOverlap
+                            }
+                            onChange={(event) =>
+                                setPreventFieldOverlap(
+                                    event.target.checked
+                                )
+                            }
+                        />
+
+                        Prevent field overlap
+                    </label>
+
+                    {!preventFieldOverlap && (
+                        <div className="custom-path-warning">
+                            Overlap protection is off.
+                            Fields may overlap, so check
+                            the board carefully.
+                        </div>
+                    )}
+
+                    {customPathMessage && (
+                        <div className="custom-path-message">
+                            {customPathMessage}
+                        </div>
+                    )}
 
                     <button
                         type="button"

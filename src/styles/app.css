@@ -84,6 +84,12 @@ select {
     border-left: 1px solid #ccc;
 
     background: white;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+
+    flex-shrink: 0;
 }
 
 .properties-panel h2 {
@@ -218,4 +224,19 @@ select {
 
 .custom-path-field {
     border-radius: 50%;
+}
+
+.custom-path-warning {
+    padding: 8px;
+
+    font-size: 12px;
+    line-height: 1.4;
+
+    border: 1px solid #999;
+    border-radius: 4px;
+}
+
+.custom-path-message {
+    font-size: 12px;
+    line-height: 1.4;
 }

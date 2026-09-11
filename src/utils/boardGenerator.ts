@@ -921,7 +921,6 @@ export function generateMillBoard({
     ): LineSegment[] => {
         const min = inset;
         const max = size - inset;
-        const mid = center;
 
         return [
             {
@@ -1225,10 +1224,10 @@ export function calculatePathLength(
         totalLength +=
             Math.hypot(
                 points[i + 1].x -
-                    points[i].x,
+                points[i].x,
 
                 points[i + 1].y -
-                    points[i].y
+                points[i].y
             );
     }
 
@@ -1270,7 +1269,7 @@ export function calculateRecommendedMaxFields({
         2,
         Math.floor(
             pathLength /
-                requiredSpacing
+            requiredSpacing
         ) + 1
     );
 }
@@ -1297,10 +1296,10 @@ function fieldsOverlap(
             const distance =
                 Math.hypot(
                     fields[i].x -
-                        fields[j].x,
+                    fields[j].x,
 
                     fields[i].y -
-                        fields[j].y
+                    fields[j].y
                 );
 
             if (
@@ -1313,6 +1312,32 @@ function fieldsOverlap(
     }
 
     return false;
+}
+
+interface CustomPathOverlapOptions {
+    points: PathPoint[];
+    fieldCount: number;
+    fieldSizeMm: number;
+    minimumGapMm?: number;
+}
+
+export function customPathHasOverlap({
+    points,
+    fieldCount,
+    fieldSizeMm,
+    minimumGapMm = 1,
+}: CustomPathOverlapOptions): boolean {
+    const fields =
+        generateFieldsAlongPath({
+            points,
+            fieldCount,
+        });
+
+    return fieldsOverlap(
+        fields,
+        fieldSizeMm,
+        minimumGapMm
+    );
 }
 
 interface FindSafeFieldCountOptions {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 
 import { createRoot } from "react-dom/client";
 
@@ -14,7 +14,7 @@ import {
 } from "./models/BoardProject";
 
 import {
-  calculateRecommendedMaxFields,
+  customPathHasOverlap,
   findSafeFieldCount,
 } from "./utils/boardGenerator";
 
@@ -67,6 +67,18 @@ function App() {
   ] = useState<PathPoint[]>([]);
 
   const [
+    preventFieldOverlap,
+    setPreventFieldOverlap,
+  ] = useState(true);
+
+  const [
+    customPathMessage,
+    setCustomPathMessage,
+  ] = useState<string | null>(
+    null
+  );
+
+  const [
     layout,
     setLayout,
   ] = useState<BoardLayout>(
@@ -105,34 +117,82 @@ function App() {
     setCustomPathFieldSizeMm,
   ] = useState(10);
 
-  const customPathRecommendedMax =
-    useMemo(
-      () =>
-        calculateRecommendedMaxFields({
-          points:
-            customPathPoints,
-
-          fieldSizeMm:
-            customPathFieldSizeMm,
-
-          minimumGapMm: 1,
-        }),
-      [
-        customPathPoints,
-        customPathFieldSizeMm,
-      ]
-    );
-
   const handleGenerate = () => {
     if (
       layout === "custom-path"
     ) {
-      const safeFieldCount =
-        findSafeFieldCount({
+      if (
+        customPathPoints.length < 2
+      ) {
+        setCustomPathMessage(
+          "Draw a path first."
+        );
+
+        return;
+      }
+
+      if (preventFieldOverlap) {
+        const safeFieldCount =
+          findSafeFieldCount({
+            points:
+              customPathPoints,
+
+            requestedFieldCount:
+              fieldCountInput,
+
+            fieldSizeMm:
+              customPathFieldSizeMm,
+
+            minimumGapMm: 1,
+          });
+
+        if (safeFieldCount < 2) {
+          setCustomPathMessage(
+            "The path is too short for the selected field size."
+          );
+
+          return;
+        }
+
+        setGeneratedFieldCount(
+          safeFieldCount
+        );
+
+        setGeneratedCustomPathPoints(
+          [...customPathPoints]
+        );
+
+        if (
+          safeFieldCount <
+          fieldCountInput
+        ) {
+          setCustomPathMessage(
+            `${safeFieldCount} fields were generated instead of ${fieldCountInput} to prevent overlap.`
+          );
+        }
+        else {
+          setCustomPathMessage(
+            null
+          );
+        }
+
+        return;
+      }
+
+      setGeneratedFieldCount(
+        fieldCountInput
+      );
+
+      setGeneratedCustomPathPoints(
+        [...customPathPoints]
+      );
+
+      const hasOverlap =
+        customPathHasOverlap({
           points:
             customPathPoints,
 
-          requestedFieldCount:
+          fieldCount:
             fieldCountInput,
 
           fieldSizeMm:
@@ -141,23 +201,16 @@ function App() {
           minimumGapMm: 1,
         });
 
-      if (
-        safeFieldCount < 2
-      ) {
-        return;
+      if (hasOverlap) {
+        setCustomPathMessage(
+          "Warning: some fields overlap. Check the board carefully before exporting."
+        );
       }
-
-      setGeneratedFieldCount(
-        safeFieldCount
-      );
-
-      setFieldCountInput(
-        safeFieldCount
-      );
-
-      setGeneratedCustomPathPoints(
-        [...customPathPoints]
-      );
+      else {
+        setCustomPathMessage(
+          null
+        );
+      }
 
       return;
     }
@@ -177,6 +230,10 @@ function App() {
     setGeneratedCustomPathPoints(
       []
     );
+
+    setCustomPathMessage(
+      null
+    );
   };
 
   const handleClearCustomPath =
@@ -188,7 +245,27 @@ function App() {
       setGeneratedCustomPathPoints(
         []
       );
+
+      setCustomPathMessage(
+        null
+      );
     };
+
+  const handleCustomPathFieldSizeChange = (
+    size: number
+  ) => {
+    setCustomPathFieldSizeMm(
+      size
+    );
+
+    setGeneratedCustomPathPoints(
+      []
+    );
+
+    setCustomPathMessage(
+      null
+    );
+  };
 
   return (
     <div className="app">
@@ -347,11 +424,19 @@ function App() {
           }
 
           setCustomPathFieldSizeMm={
-            setCustomPathFieldSizeMm
+            handleCustomPathFieldSizeChange
           }
 
-          customPathRecommendedMax={
-            customPathRecommendedMax
+          preventFieldOverlap={
+            preventFieldOverlap
+          }
+
+          setPreventFieldOverlap={
+            setPreventFieldOverlap
+          }
+
+          customPathMessage={
+            customPathMessage
           }
         />
       </div>
