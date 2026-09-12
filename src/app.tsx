@@ -16,7 +16,7 @@ import {
 import {
   customPathHasOverlap,
   findSafeFieldCount,
-} from "./utils/boardGenerator";
+} from "./utils/customPathGenerator";
 
 import {
   FieldShape,

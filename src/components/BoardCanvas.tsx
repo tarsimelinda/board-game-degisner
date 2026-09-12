@@ -31,9 +31,12 @@ import {
     generateMonopolyRing,
     generateMillBoard,
     generateTicTacToeBoard,
+} from "../utils/boardGenerator";
+
+import {
     generateFieldsAlongPath,
     generateContinuousPath,
-} from "../utils/boardGenerator";
+} from "../utils/customPathGenerator";
 
 interface BoardCanvasProps {
     paperSize: PaperSize;
@@ -786,7 +789,7 @@ export function BoardCanvas({
                                     index
                                 ) => {
                                     const angle =
-                                        field.angle ?? 0;
+                                        field.angle;
 
                                     return (
                                         <div
