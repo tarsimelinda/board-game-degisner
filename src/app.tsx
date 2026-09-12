@@ -23,6 +23,7 @@ import { BoardLayout } from "./models/BoardLayout";
 import { GridPreset } from "./models/GridPreset";
 
 import {
+  CustomPathDistribution,
   PathPoint,
 } from "./models/CustomPath";
 
@@ -117,15 +118,65 @@ function App() {
     setCustomPathFieldSizeMm,
   ] = useState(10);
 
+  const [
+    customPathDistribution,
+    setCustomPathDistribution,
+  ] =
+    useState<CustomPathDistribution>(
+      "spaced"
+    );
+
+  const [
+    continuousPathWidthMm,
+    setContinuousPathWidthMm,
+  ] = useState(14);
+
+  const handleCustomPathDistributionChange = (
+    distribution:
+      CustomPathDistribution
+  ) => {
+    setCustomPathDistribution(
+      distribution
+    );
+
+    setGeneratedCustomPathPoints(
+      []
+    );
+
+    setCustomPathMessage(
+      null
+    );
+  };
+
   const handleGenerate = () => {
     if (
       layout === "custom-path"
     ) {
       if (
-        customPathPoints.length < 2
+        customPathPoints.length <
+        2
       ) {
         setCustomPathMessage(
           "Draw a path first."
+        );
+
+        return;
+      }
+
+      if (
+        customPathDistribution ===
+        "continuous"
+      ) {
+        setGeneratedFieldCount(
+          fieldCountInput
+        );
+
+        setGeneratedCustomPathPoints(
+          [...customPathPoints]
+        );
+
+        setCustomPathMessage(
+          null
         );
 
         return;
@@ -146,7 +197,9 @@ function App() {
             minimumGapMm: 1,
           });
 
-        if (safeFieldCount < 2) {
+        if (
+          safeFieldCount < 2
+        ) {
           setCustomPathMessage(
             "The path is too short for the selected field size."
           );
@@ -328,6 +381,14 @@ function App() {
           onCustomPathChange={
             handleCustomPathChange
           }
+
+          customPathDistribution={
+            customPathDistribution
+          }
+
+          continuousPathWidthMm={
+            continuousPathWidthMm
+          }
         />
 
         <PropertiesPanel
@@ -437,6 +498,22 @@ function App() {
 
           customPathMessage={
             customPathMessage
+          }
+
+          customPathDistribution={
+            customPathDistribution
+          }
+
+          setCustomPathDistribution={
+            handleCustomPathDistributionChange
+          }
+
+          continuousPathWidthMm={
+            continuousPathWidthMm
+          }
+
+          setContinuousPathWidthMm={
+            setContinuousPathWidthMm
           }
         />
       </div>

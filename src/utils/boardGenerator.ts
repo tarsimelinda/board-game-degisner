@@ -43,6 +43,159 @@ export interface TicTacToeBoardResult {
     lines: LineSegment[];
 }
 
+export interface ContinuousPathField {
+    x: number;
+    y: number;
+    angle: number;
+}
+
+export interface ContinuousPathResult {
+    fields: ContinuousPathField[];
+    dividers: LineSegment[];
+    fieldLengthMm: number;
+}
+
+interface GenerateContinuousPathOptions {
+    points: PathPoint[];
+    fieldCount: number;
+    pathWidthMm: number;
+}
+
+export function generateContinuousPath({
+    points,
+    fieldCount,
+    pathWidthMm,
+}: GenerateContinuousPathOptions): ContinuousPathResult {
+    if (
+        points.length < 2 ||
+        fieldCount < 1 ||
+        pathWidthMm <= 0
+    ) {
+        return {
+            fields: [],
+            dividers: [],
+            fieldLengthMm: 0,
+        };
+    }
+
+    const totalLength =
+        calculatePathLength(
+            points
+        );
+
+    if (totalLength <= 0) {
+        return {
+            fields: [],
+            dividers: [],
+            fieldLengthMm: 0,
+        };
+    }
+
+    const fieldLengthMm =
+        totalLength /
+        fieldCount;
+
+    const fields:
+        ContinuousPathField[] = [];
+
+    const dividers:
+        LineSegment[] = [];
+
+    for (
+        let i = 0;
+        i < fieldCount;
+        i++
+    ) {
+        const distance =
+            (
+                i + 0.5
+            ) *
+            fieldLengthMm;
+
+        const sample =
+            getPathSampleAtDistance(
+                points,
+                distance
+            );
+
+        if (sample) {
+            fields.push({
+                x:
+                    sample.x,
+
+                y:
+                    sample.y,
+
+                angle:
+                    sample.angle,
+            });
+        }
+    }
+
+    for (
+        let i = 1;
+        i < fieldCount;
+        i++
+    ) {
+        const distance =
+            i *
+            fieldLengthMm;
+
+        const sample =
+            getPathSampleAtDistance(
+                points,
+                distance
+            );
+
+        if (!sample) {
+            continue;
+        }
+
+        const normalAngle =
+            sample.angle +
+            Math.PI / 2;
+
+        const halfWidth =
+            pathWidthMm / 2;
+
+        const offsetX =
+            Math.cos(
+                normalAngle
+            ) *
+            halfWidth;
+
+        const offsetY =
+            Math.sin(
+                normalAngle
+            ) *
+            halfWidth;
+
+        dividers.push({
+            x1:
+                sample.x -
+                offsetX,
+
+            y1:
+                sample.y -
+                offsetY,
+
+            x2:
+                sample.x +
+                offsetX,
+
+            y2:
+                sample.y +
+                offsetY,
+        });
+    }
+
+    return {
+        fields,
+        dividers,
+        fieldLengthMm,
+    };
+}
+
 export function calculateFieldSize({
     boardWidthMm,
     boardHeightMm,
@@ -1338,6 +1491,119 @@ export function customPathHasOverlap({
         fieldSizeMm,
         minimumGapMm
     );
+}
+
+interface PathSample {
+    x: number;
+    y: number;
+    angle: number;
+}
+
+function getPathSampleAtDistance(
+    points: PathPoint[],
+    targetDistance: number
+): PathSample | null {
+    if (points.length < 2) {
+        return null;
+    }
+
+    let travelledDistance = 0;
+
+    for (
+        let i = 0;
+        i < points.length - 1;
+        i++
+    ) {
+        const start =
+            points[i];
+
+        const end =
+            points[i + 1];
+
+        const dx =
+            end.x - start.x;
+
+        const dy =
+            end.y - start.y;
+
+        const segmentLength =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+        if (
+            segmentLength <= 0.001
+        ) {
+            continue;
+        }
+
+        if (
+            travelledDistance +
+            segmentLength >=
+            targetDistance
+        ) {
+            const distanceInsideSegment =
+                targetDistance -
+                travelledDistance;
+
+            const ratio =
+                Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        distanceInsideSegment /
+                        segmentLength
+                    )
+                );
+
+            return {
+                x:
+                    start.x +
+                    dx * ratio,
+
+                y:
+                    start.y +
+                    dy * ratio,
+
+                angle:
+                    Math.atan2(
+                        dy,
+                        dx
+                    ),
+            };
+        }
+
+        travelledDistance +=
+            segmentLength;
+    }
+
+    const lastPoint =
+        points[
+        points.length - 1
+        ];
+
+    const previousPoint =
+        points[
+        points.length - 2
+        ];
+
+    return {
+        x:
+            lastPoint.x,
+
+        y:
+            lastPoint.y,
+
+        angle:
+            Math.atan2(
+                lastPoint.y -
+                previousPoint.y,
+
+                lastPoint.x -
+                previousPoint.x
+            ),
+    };
 }
 
 interface FindSafeFieldCountOptions {

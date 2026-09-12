@@ -240,3 +240,37 @@ select {
     font-size: 12px;
     line-height: 1.4;
 }
+
+.continuous-path-outline {
+    fill: none;
+    stroke: #333;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.continuous-path-body {
+    fill: none;
+    stroke: white;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.continuous-path-divider {
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.continuous-path-number {
+    position: absolute;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 10px;
+    line-height: 1;
+
+    pointer-events: none;
+    user-select: none;
+}

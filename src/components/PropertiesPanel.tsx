@@ -13,6 +13,10 @@ import {
     PaperSize,
 } from "../models/BoardProject";
 
+import {
+    CustomPathDistribution,
+} from "../models/CustomPath";
+
 interface PropertiesPanelProps {
     paperSize: PaperSize;
     setPaperSize:
@@ -72,6 +76,20 @@ interface PropertiesPanelProps {
 
     customPathMessage:
     string | null;
+
+    customPathDistribution:
+    CustomPathDistribution;
+
+    setCustomPathDistribution:
+    (
+        distribution:
+            CustomPathDistribution
+    ) => void;
+
+    continuousPathWidthMm: number;
+
+    setContinuousPathWidthMm:
+    (width: number) => void;
 }
 
 export function PropertiesPanel({
@@ -115,6 +133,12 @@ export function PropertiesPanel({
     setPreventFieldOverlap,
 
     customPathMessage,
+
+    customPathDistribution,
+    setCustomPathDistribution,
+
+    continuousPathWidthMm,
+    setContinuousPathWidthMm,
 }: PropertiesPanelProps) {
     const currentLayoutConfig =
         LAYOUT_CONFIG[layout];
@@ -470,78 +494,182 @@ export function PropertiesPanel({
                     </div>
 
                     <label>
-                        Field size
+                        Field distribution
 
-                        <input
-                            type="range"
-                            min="5"
-                            max="25"
-                            step="1"
+                        <select
                             value={
-                                customPathFieldSizeMm
+                                customPathDistribution
                             }
                             onChange={(event) =>
-                                setCustomPathFieldSizeMm(
-                                    Number(
-                                        event.target.value
-                                    )
+                                setCustomPathDistribution(
+                                    event.target.value as
+                                    CustomPathDistribution
                                 )
                             }
-                        />
+                        >
+                            <option value="spaced">
+                                Spaced
+                            </option>
 
-                        <span>
-                            {
-                                customPathFieldSizeMm
-                            } mm
-                        </span>
+                            <option value="continuous">
+                                Continuous
+                            </option>
+                        </select>
                     </label>
 
-                    <label>
-                        Number of fields
+                    {customPathDistribution ===
+                        "spaced" && (
+                            <>
+                                <label>
+                                    Field size
 
-                        <input
-                            type="number"
-                            min="2"
-                            max="500"
-                            value={
-                                fieldCount
-                            }
-                            onChange={(event) =>
-                                setFieldCount(
-                                    Math.max(
-                                        2,
-                                        Number(
-                                            event.target.value
-                                        )
-                                    )
-                                )
-                            }
-                        />
-                    </label>
+                                    <input
+                                        type="range"
+                                        min="5"
+                                        max="25"
+                                        step="1"
+                                        value={
+                                            customPathFieldSizeMm
+                                        }
+                                        onChange={(event) =>
+                                            setCustomPathFieldSizeMm(
+                                                Number(
+                                                    event
+                                                        .target
+                                                        .value
+                                                )
+                                            )
+                                        }
+                                    />
 
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={
-                                preventFieldOverlap
-                            }
-                            onChange={(event) =>
-                                setPreventFieldOverlap(
-                                    event.target.checked
-                                )
-                            }
-                        />
+                                    <span>
+                                        {
+                                            customPathFieldSizeMm
+                                        }{" "}
+                                        mm
+                                    </span>
+                                </label>
 
-                        Prevent field overlap
-                    </label>
+                                <label>
+                                    Number of fields
 
-                    {!preventFieldOverlap && (
-                        <div className="custom-path-warning">
-                            Overlap protection is off.
-                            Fields may overlap, so check
-                            the board carefully.
-                        </div>
-                    )}
+                                    <input
+                                        type="number"
+                                        min="2"
+                                        max="500"
+                                        value={
+                                            fieldCount
+                                        }
+                                        onChange={(event) =>
+                                            setFieldCount(
+                                                Math.max(
+                                                    2,
+                                                    Number(
+                                                        event
+                                                            .target
+                                                            .value
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    />
+                                </label>
+
+                                <label className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            preventFieldOverlap
+                                        }
+                                        onChange={(event) =>
+                                            setPreventFieldOverlap(
+                                                event
+                                                    .target
+                                                    .checked
+                                            )
+                                        }
+                                    />
+
+                                    Prevent field overlap
+                                </label>
+
+                                {!preventFieldOverlap && (
+                                    <div className="custom-path-warning">
+                                        Overlap protection
+                                        is off. Fields may
+                                        overlap, so check
+                                        the board carefully.
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                    {customPathDistribution ===
+                        "continuous" && (
+                            <>
+                                <label>
+                                    Path width
+
+                                    <input
+                                        type="range"
+                                        min="6"
+                                        max="30"
+                                        step="1"
+                                        value={
+                                            continuousPathWidthMm
+                                        }
+                                        onChange={(event) =>
+                                            setContinuousPathWidthMm(
+                                                Number(
+                                                    event
+                                                        .target
+                                                        .value
+                                                )
+                                            )
+                                        }
+                                    />
+
+                                    <span>
+                                        {
+                                            continuousPathWidthMm
+                                        }{" "}
+                                        mm
+                                    </span>
+                                </label>
+
+                                <label>
+                                    Number of fields
+
+                                    <input
+                                        type="number"
+                                        min="2"
+                                        max="500"
+                                        value={
+                                            fieldCount
+                                        }
+                                        onChange={(event) =>
+                                            setFieldCount(
+                                                Math.max(
+                                                    2,
+                                                    Number(
+                                                        event
+                                                            .target
+                                                            .value
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    />
+                                </label>
+
+                                <div className="custom-path-help">
+                                    Field length is
+                                    calculated automatically
+                                    so the whole path is
+                                    filled.
+                                </div>
+                            </>
+                        )}
 
                     {customPathMessage && (
                         <div className="custom-path-message">
@@ -551,9 +679,7 @@ export function PropertiesPanel({
 
                     <button
                         type="button"
-                        onClick={
-                            onGenerate
-                        }
+                        onClick={onGenerate}
                     >
                         Generate path
                     </button>

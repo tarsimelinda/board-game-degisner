@@ -9,6 +9,7 @@ import {
 import { BoardLayout } from "../models/BoardLayout";
 
 import {
+    CustomPathDistribution,
     PathPoint,
 } from "../models/CustomPath";
 
@@ -23,6 +24,7 @@ import {
     generateMillBoard,
     generateTicTacToeBoard,
     generateFieldsAlongPath,
+    generateContinuousPath,
 } from "../utils/boardGenerator";
 
 interface BoardCanvasProps {
@@ -46,6 +48,11 @@ interface BoardCanvasProps {
 
     onCustomPathChange:
     (points: PathPoint[]) => void;
+
+    customPathDistribution:
+    CustomPathDistribution;
+
+    continuousPathWidthMm: number;
 }
 
 const PAPER_SIZES = {
@@ -80,6 +87,8 @@ export function BoardCanvas({
     generatedCustomPathPoints,
     onCustomPathChange,
     customPathFieldSizeMm,
+    customPathDistribution,
+    continuousPathWidthMm,
 }: BoardCanvasProps) {
     const canvasRef =
         useRef<HTMLElement>(null);
@@ -384,7 +393,9 @@ export function BoardCanvas({
     };
 
     const customPathFields =
-        usesCustomPath
+        usesCustomPath &&
+            customPathDistribution ===
+            "spaced"
             ? generateFieldsAlongPath({
                 points:
                     generatedCustomPathPoints,
@@ -392,6 +403,21 @@ export function BoardCanvas({
                 fieldCount,
             })
             : [];
+
+    const continuousPath =
+        usesCustomPath &&
+            customPathDistribution ===
+            "continuous"
+            ? generateContinuousPath({
+                points:
+                    generatedCustomPathPoints,
+
+                fieldCount,
+
+                pathWidthMm:
+                    continuousPathWidthMm,
+            })
+            : null;
 
     const usesMillBoard =
         layout === "mill-board" &&
@@ -597,7 +623,13 @@ export function BoardCanvas({
                     >
 
                         {usesCustomPath &&
-                            customPathPoints.length >= 2 && (
+                            customPathPoints.length >= 2 &&
+                            !(
+                                customPathDistribution ===
+                                "continuous" &&
+                                generatedCustomPathPoints.length >=
+                                2
+                            ) && (
                                 <svg
                                     className="custom-path-svg"
 
@@ -622,8 +654,120 @@ export function BoardCanvas({
                                 </svg>
                             )}
 
+                        {usesCustomPath &&
+                            customPathDistribution ===
+                            "continuous" &&
+                            generatedCustomPathPoints.length >=
+                            2 &&
+                            continuousPath && (
+                                <>
+                                    <svg
+                                        className="custom-path-svg"
+                                        viewBox={
+                                            `0 0 ${boardWidthMm} ${boardHeightMm}`
+                                        }
+                                        preserveAspectRatio="none"
+                                    >
+
+                                        <polyline
+                                            className="continuous-path-outline"
+                                            points={
+                                                generatedCustomPathPoints
+                                                    .map(
+                                                        (point) =>
+                                                            `${point.x},${point.y}`
+                                                    )
+                                                    .join(" ")
+                                            }
+                                            style={{
+                                                strokeWidth:
+                                                    continuousPathWidthMm +
+                                                    1.5,
+                                            }}
+                                        />
+
+                                        <polyline
+                                            className="continuous-path-body"
+                                            points={
+                                                generatedCustomPathPoints
+                                                    .map(
+                                                        (point) =>
+                                                            `${point.x},${point.y}`
+                                                    )
+                                                    .join(" ")
+                                            }
+                                            style={{
+                                                strokeWidth:
+                                                    continuousPathWidthMm,
+                                            }}
+                                        />
+
+                                        {continuousPath.dividers.map(
+                                            (
+                                                divider,
+                                                index
+                                            ) => (
+                                                <line
+                                                    key={
+                                                        `continuous-divider-${index}`
+                                                    }
+
+                                                    className="continuous-path-divider"
+
+                                                    x1={
+                                                        divider.x1
+                                                    }
+
+                                                    y1={
+                                                        divider.y1
+                                                    }
+
+                                                    x2={
+                                                        divider.x2
+                                                    }
+
+                                                    y2={
+                                                        divider.y2
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </svg>
+
+                                    {showFieldNumbers &&
+                                        continuousPath.fields.map(
+                                            (
+                                                field,
+                                                index
+                                            ) => (
+                                                <div
+                                                    key={
+                                                        `continuous-number-${index}`
+                                                    }
+
+                                                    className="continuous-path-number"
+
+                                                    style={{
+                                                        left:
+                                                            field.x *
+                                                            displayScale,
+
+                                                        top:
+                                                            field.y *
+                                                            displayScale,
+                                                    }}
+                                                >
+                                                    {index + 1}
+                                                </div>
+                                            )
+                                        )}
+                                </>
+                            )}
+
 
                         {usesCustomPath &&
+                            customPathDistribution ===
+                            "spaced" &&
                             customPathFields.map(
                                 (
                                     field,
