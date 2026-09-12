@@ -18,6 +18,10 @@ import {
   findSafeFieldCount,
 } from "./utils/boardGenerator";
 
+import {
+  FieldShape,
+} from "./models/FieldShape";
+
 import { BoardLayout } from "./models/BoardLayout";
 
 import { GridPreset } from "./models/GridPreset";
@@ -130,6 +134,13 @@ function App() {
     continuousPathWidthMm,
     setContinuousPathWidthMm,
   ] = useState(14);
+
+  const [
+    customPathFieldShape,
+    setCustomPathFieldShape,
+  ] = useState<FieldShape>(
+    "circle"
+  );
 
   const handleCustomPathDistributionChange = (
     distribution:
@@ -389,6 +400,10 @@ function App() {
           continuousPathWidthMm={
             continuousPathWidthMm
           }
+
+          customPathFieldShape={
+            customPathFieldShape
+          }
         />
 
         <PropertiesPanel
@@ -514,6 +529,14 @@ function App() {
 
           setContinuousPathWidthMm={
             setContinuousPathWidthMm
+          }
+
+          customPathFieldShape={
+            customPathFieldShape
+          }
+
+          setCustomPathFieldShape={
+            setCustomPathFieldShape
           }
         />
       </div>

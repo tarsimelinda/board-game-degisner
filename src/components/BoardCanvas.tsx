@@ -14,6 +14,14 @@ import {
 } from "../models/CustomPath";
 
 import {
+    FieldShape,
+} from "../models/FieldShape";
+
+import {
+    CustomPathFieldShape,
+} from "./CustomPathFieldShape";
+
+import {
     calculateFieldSize,
     calculateSnakeFieldSize,
     generatePerimeterFields,
@@ -53,6 +61,9 @@ interface BoardCanvasProps {
     CustomPathDistribution;
 
     continuousPathWidthMm: number;
+
+    customPathFieldShape:
+    FieldShape;
 }
 
 const PAPER_SIZES = {
@@ -89,6 +100,7 @@ export function BoardCanvas({
     customPathFieldSizeMm,
     customPathDistribution,
     continuousPathWidthMm,
+    customPathFieldShape,
 }: BoardCanvasProps) {
     const canvasRef =
         useRef<HTMLElement>(null);
@@ -772,41 +784,59 @@ export function BoardCanvas({
                                 (
                                     field,
                                     index
-                                ) => (
-                                    <div
-                                        key={
-                                            `custom-path-${index}`
-                                        }
+                                ) => {
+                                    const angle =
+                                        field.angle ?? 0;
 
-                                        className={
-                                            "board-field custom-path-field"
-                                        }
+                                    return (
+                                        <div
+                                            key={
+                                                `custom-path-${index}`
+                                            }
 
-                                        style={{
-                                            width:
-                                                customPathFieldSizeMm *
-                                                displayScale,
+                                            className="custom-path-field-wrapper"
 
-                                            height:
-                                                customPathFieldSizeMm *
-                                                displayScale,
+                                            style={{
+                                                width:
+                                                    customPathFieldSizeMm *
+                                                    displayScale,
 
-                                            left:
-                                                field.x *
-                                                displayScale,
+                                                height:
+                                                    customPathFieldSizeMm *
+                                                    displayScale,
 
-                                            top:
-                                                field.y *
-                                                displayScale,
-                                        }}
-                                    >
-                                        {showFieldNumbers && (
-                                            <span className="field-number">
-                                                {index + 1}
-                                            </span>
-                                        )}
-                                    </div>
-                                )
+                                                left:
+                                                    field.x *
+                                                    displayScale,
+
+                                                top:
+                                                    field.y *
+                                                    displayScale,
+
+                                                transform:
+                                                    `translate(-50%, -50%) rotate(${angle}rad)`,
+                                            }}
+                                        >
+                                            <CustomPathFieldShape
+                                                shape={
+                                                    customPathFieldShape
+                                                }
+
+                                                number={
+                                                    index + 1
+                                                }
+
+                                                angle={
+                                                    angle
+                                                }
+
+                                                showNumber={
+                                                    showFieldNumbers
+                                                }
+                                            />
+                                        </div>
+                                    );
+                                }
                             )}
 
                         {usesMillBoard &&

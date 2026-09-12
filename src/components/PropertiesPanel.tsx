@@ -14,6 +14,10 @@ import {
 } from "../models/BoardProject";
 
 import {
+    FieldShape,
+} from "../models/FieldShape";
+
+import {
     CustomPathDistribution,
 } from "../models/CustomPath";
 
@@ -90,6 +94,12 @@ interface PropertiesPanelProps {
 
     setContinuousPathWidthMm:
     (width: number) => void;
+
+    customPathFieldShape:
+    FieldShape;
+
+    setCustomPathFieldShape:
+    (shape: FieldShape) => void;
 }
 
 export function PropertiesPanel({
@@ -139,6 +149,9 @@ export function PropertiesPanel({
 
     continuousPathWidthMm,
     setContinuousPathWidthMm,
+
+    customPathFieldShape,
+    setCustomPathFieldShape,
 }: PropertiesPanelProps) {
     const currentLayoutConfig =
         LAYOUT_CONFIG[layout];
@@ -513,6 +526,37 @@ export function PropertiesPanel({
 
                             <option value="continuous">
                                 Continuous
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Field shape
+
+                        <select
+                            value={
+                                customPathFieldShape
+                            }
+                            onChange={(event) =>
+                                setCustomPathFieldShape(
+                                    event.target.value as FieldShape
+                                )
+                            }
+                        >
+                            <option value="circle">
+                                Circle
+                            </option>
+
+                            <option value="square">
+                                Square
+                            </option>
+
+                            <option value="heart">
+                                Heart
+                            </option>
+
+                            <option value="diamond">
+                                Diamond
                             </option>
                         </select>
                     </label>

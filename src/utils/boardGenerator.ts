@@ -10,6 +10,8 @@ import {
 export interface FieldPosition {
     x: number;
     y: number;
+
+    angle?: number;
 }
 export interface FieldGeometry {
     x: number;
@@ -1342,6 +1344,15 @@ export function generateFieldsAlongPath({
                 segment.length
             );
 
+        const angle =
+            Math.atan2(
+                segment.end.y -
+                segment.start.y,
+
+                segment.end.x -
+                segment.start.x
+            );
+
         fields.push({
             x:
                 segment.start.x +
@@ -1358,6 +1369,8 @@ export function generateFieldsAlongPath({
                     segment.start.y
                 ) *
                 ratio,
+
+            angle,
         });
     }
 

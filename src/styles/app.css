@@ -222,10 +222,6 @@ select {
     stroke-linejoin: round;
 }
 
-.custom-path-field {
-    border-radius: 50%;
-}
-
 .custom-path-warning {
     padding: 8px;
 
@@ -267,6 +263,46 @@ select {
 
     transform:
         translate(-50%, -50%);
+
+    font-size: 10px;
+    line-height: 1;
+
+    pointer-events: none;
+    user-select: none;
+}
+
+.custom-path-field-wrapper {
+    position: absolute;
+
+    transform-origin: center;
+
+    pointer-events: none;
+    user-select: none;
+}
+
+.custom-path-field-shape {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: visible;
+}
+
+.custom-path-shape-element {
+    fill: white;
+
+    stroke: #333;
+    stroke-width: 1.5;
+
+    vector-effect: non-scaling-stroke;
+}
+
+.custom-path-field-number {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
 
     font-size: 10px;
     line-height: 1;
