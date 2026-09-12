@@ -28,7 +28,7 @@ import { GridPreset } from "./models/GridPreset";
 
 import {
   CustomPathDistribution,
-  PathPoint,
+  CustomPathRoute,
 } from "./models/CustomPath";
 
 import "./styles/app.css";
@@ -62,14 +62,19 @@ function App() {
   ] = useState(0);
 
   const [
-    customPathPoints,
-    setCustomPathPoints,
-  ] = useState<PathPoint[]>([]);
+    customPath,
+    setCustomPath,
+  ] = useState<CustomPathRoute>({
+    points: [],
+  });
 
   const [
-    generatedCustomPathPoints,
-    setGeneratedCustomPathPoints,
-  ] = useState<PathPoint[]>([]);
+    generatedCustomPath,
+    setGeneratedCustomPath,
+  ] =
+    useState<CustomPathRoute | null>(
+      null
+    );
 
   const [
     preventFieldOverlap,
@@ -150,8 +155,8 @@ function App() {
       distribution
     );
 
-    setGeneratedCustomPathPoints(
-      []
+    setGeneratedCustomPath(
+      null
     );
 
     setCustomPathMessage(
@@ -164,7 +169,7 @@ function App() {
       layout === "custom-path"
     ) {
       if (
-        customPathPoints.length <
+        customPath.points.length <
         2
       ) {
         setCustomPathMessage(
@@ -182,9 +187,11 @@ function App() {
           fieldCountInput
         );
 
-        setGeneratedCustomPathPoints(
-          [...customPathPoints]
-        );
+        setGeneratedCustomPath({
+          points: [
+            ...customPath.points,
+          ],
+        });
 
         setCustomPathMessage(
           null
@@ -197,7 +204,7 @@ function App() {
         const safeFieldCount =
           findSafeFieldCount({
             points:
-              customPathPoints,
+              customPath.points,
 
             requestedFieldCount:
               fieldCountInput,
@@ -222,9 +229,11 @@ function App() {
           safeFieldCount
         );
 
-        setGeneratedCustomPathPoints(
-          [...customPathPoints]
-        );
+        setGeneratedCustomPath({
+          points: [
+            ...customPath.points,
+          ],
+        });
 
         if (
           safeFieldCount <
@@ -247,14 +256,16 @@ function App() {
         fieldCountInput
       );
 
-      setGeneratedCustomPathPoints(
-        [...customPathPoints]
-      );
+      setGeneratedCustomPath({
+        points: [
+          ...customPath.points,
+        ],
+      });
 
       const hasOverlap =
         customPathHasOverlap({
           points:
-            customPathPoints,
+            customPath.points,
 
           fieldCount:
             fieldCountInput,
@@ -285,14 +296,14 @@ function App() {
   };
 
   const handleCustomPathChange = (
-    points: PathPoint[]
+    route: CustomPathRoute
   ) => {
-    setCustomPathPoints(
-      points
+    setCustomPath(
+      route
     );
 
-    setGeneratedCustomPathPoints(
-      []
+    setGeneratedCustomPath(
+      null
     );
 
     setCustomPathMessage(
@@ -302,12 +313,12 @@ function App() {
 
   const handleClearCustomPath =
     () => {
-      setCustomPathPoints(
-        []
-      );
+      setCustomPath({
+        points: [],
+      });
 
-      setGeneratedCustomPathPoints(
-        []
+      setGeneratedCustomPath(
+        null
       );
 
       setCustomPathMessage(
@@ -322,8 +333,8 @@ function App() {
       size
     );
 
-    setGeneratedCustomPathPoints(
-      []
+    setGeneratedCustomPath(
+      null
     );
 
     setCustomPathMessage(
@@ -377,12 +388,12 @@ function App() {
             showFieldNumbers
           }
 
-          customPathPoints={
-            customPathPoints
+          customPath={
+            customPath
           }
 
-          generatedCustomPathPoints={
-            generatedCustomPathPoints
+          generatedCustomPath={
+            generatedCustomPath
           }
 
           customPathFieldSizeMm={

@@ -10,6 +10,7 @@ import { BoardLayout } from "../models/BoardLayout";
 
 import {
     CustomPathDistribution,
+    CustomPathRoute,
     PathPoint,
 } from "../models/CustomPath";
 
@@ -51,14 +52,17 @@ interface BoardCanvasProps {
     monopolyDepthPercent: number;
 
     showFieldNumbers: boolean;
-    customPathPoints: PathPoint[];
 
-    generatedCustomPathPoints: PathPoint[];
+    customPath:
+    CustomPathRoute;
+
+    generatedCustomPath:
+    CustomPathRoute | null;
 
     customPathFieldSizeMm: number;
 
     onCustomPathChange:
-    (points: PathPoint[]) => void;
+    (route: CustomPathRoute) => void;
 
     customPathDistribution:
     CustomPathDistribution;
@@ -97,14 +101,21 @@ export function BoardCanvas({
     monopolyDepthPercent,
     showFieldNumbers,
 
-    customPathPoints,
-    generatedCustomPathPoints,
+    customPath,
+    generatedCustomPath,
     onCustomPathChange,
     customPathFieldSizeMm,
     customPathDistribution,
     continuousPathWidthMm,
     customPathFieldShape,
 }: BoardCanvasProps) {
+    const customPathPoints =
+        customPath.points;
+
+    const generatedCustomPathPoints =
+        generatedCustomPath?.points ??
+        [];
+
     const canvasRef =
         useRef<HTMLElement>(null);
 
@@ -319,9 +330,11 @@ export function BoardCanvas({
                 event
             );
 
-        onCustomPathChange([
-            point,
-        ]);
+        onCustomPathChange({
+            points: [
+                point,
+            ],
+        });
 
         setIsDrawingCustomPath(
             true
@@ -350,9 +363,11 @@ export function BoardCanvas({
             ];
 
         if (!previousPoint) {
-            onCustomPathChange([
-                point,
-            ]);
+            onCustomPathChange({
+                points: [
+                    point,
+                ],
+            });
 
             return;
         }
@@ -376,10 +391,12 @@ export function BoardCanvas({
             return;
         }
 
-        onCustomPathChange([
-            ...customPathPoints,
-            point,
-        ]);
+        onCustomPathChange({
+            points: [
+                ...customPathPoints,
+                point,
+            ],
+        });
     };
 
     const handleCustomPathPointerUp = (

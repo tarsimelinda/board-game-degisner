@@ -3,6 +3,10 @@ export interface PathPoint {
     y: number;
 }
 
+export interface CustomPathRoute {
+    points: PathPoint[];
+}
+
 export type CustomPathDistribution =
     | "spaced"
     | "continuous";
